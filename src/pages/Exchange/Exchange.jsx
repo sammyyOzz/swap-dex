@@ -80,6 +80,11 @@ function ExchangeAlgo() {
     const [swiftdexStatus, setSwiftdexStatus] = useState(null)
     const [swiftdexError, setSwiftdexError] = useState(null)
 
+    const accountInfo = useSelector(state => state.swift.accountInfo.data)
+    const accountTokens = accountInfo?.Tokens
+
+    console.log('swift error', swiftdexError)
+
     const resetValues = () => {
         setFromSelectedItem({ TokenId: 0, Pair: 'Hbar', amount: 0, unit: 'Algo' })
         setToSelectedItem("")
@@ -94,16 +99,19 @@ function ExchangeAlgo() {
     }
 
     const handleSwap = () => {
-        const data = {
-            from_asset: fromSelectedItem.TokenId, 
-            to_asset: toSelectedItem.TokenId,
-            asset_amount: parseFloat(fromInputValue),
-            phrase: passphrase
-        }
+        // const data = {
+        //     from_asset: fromSelectedItem.TokenId, 
+        //     to_asset: toSelectedItem.TokenId,
+        //     asset_amount: parseFloat(fromInputValue),
+        //     phrase: passphrase
+        // }
 
-        const dispatchAlgoAction = tabValue === SWAP ? swapAlgorand : algorandLiquidity
-                
-        handleSubmit(dispatchAlgoAction(data), swapResponseCallback, swapResponseCallback)
+        const data = liquiditySubtabValue === ADD_LIQUIDITY
+            ? { tid: fromSelectedItem.TokenId } : ""
+
+        // const dispatchAlgoAction = tabValue === SWAP ? swapAlgorand : algorandLiquidity
+        
+        // handleSubmit(dispatchAlgoAction(data), swapResponseCallback, swapResponseCallback)
     }
     const selectSwap = state => state.algorand.swap
     const selectLiquidity = state => state.algorand.liquidity
@@ -160,6 +168,7 @@ function ExchangeAlgo() {
 
 
                 if (swapData.from_asset == 0) {
+                    setSwiftdexStatus(HTTP_STATUS.PENDING)
                     dispatch(hbarToToken({
                         tid: swapData.to_asset,
                         hamount: swapData.asset_amount,
@@ -170,12 +179,15 @@ function ExchangeAlgo() {
                     .then(data => {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
+                         setSwiftdexError(data)
                     })
                     .catch(err => {
                         console.log(err)
+                        setSwiftdexError(err)
                         setSwiftdexStatus(HTTP_STATUS.REJECTED)
                     })
                 } else if (swapData.to_asset == 0) {
+                    setSwiftdexStatus(HTTP_STATUS.PENDING)
                     dispatch(tokenToHbar({
                         tid: swapData.from_asset,
                         tamount: swapData.asset_amount,
@@ -186,10 +198,12 @@ function ExchangeAlgo() {
                     .then(data => {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
+                        if (typeof(data) === 'string') setSwiftdexError(data)
                     })
                     .catch(err => {
                         setSwiftdexStatus(HTTP_STATUS.REJECTED)
                         console.log(err)
+                        setSwiftdexError(err)
                     })
 
                 } else if ((swapData.from_asset != 0) && (swapData.to_asset != 0)) {
@@ -205,6 +219,7 @@ function ExchangeAlgo() {
                     })
                     .catch(err => {
                         console.log(err)
+                        setSwiftdexError(err)
                     })
 
                     //then result to token
@@ -228,11 +243,15 @@ function ExchangeAlgo() {
 
     useEffect(() => {
         if (tabValue === SWAP) handleSetToInputValue("")
-    }, [fromSelectedItem.Id])
+    }, [fromSelectedItem.TokenId])
 
     useEffect(() => {
         if (tabValue === SWAP) handleSetFromInputValue("")
     }, [toSelectedItem.TokenId])
+
+    useEffect(() => {
+        setSwiftdexError(null)
+    }, [tabValue, liquiditySubtabValue])
 
     const resetToSelectedValues = () => {
         setToSelectedItem("")
@@ -240,13 +259,15 @@ function ExchangeAlgo() {
     }
 
     const handleFromInputFocus = () => {
+        if ((liquiditySubtabValue === CREATE_PAIR) || (liquiditySubtabValue === REMOVE_LIQUIDITY)) return
         setSwapIds({ from: fromSelectedItem.TokenId, to: toSelectedItem.TokenId })
         handleSetToInputValue("")
     }
 
     const handleToInputFocus = () => {
+        if ((liquiditySubtabValue === CREATE_PAIR) || (liquiditySubtabValue === REMOVE_LIQUIDITY)) return
         setSwapIds({ from: toSelectedItem.TokenId, to: fromSelectedItem.TokenId })
-        if (tabValue === SWAP) handleSetFromInputValue("")
+        handleSetFromInputValue("")
     }
 
 
@@ -287,7 +308,7 @@ function ExchangeAlgo() {
                                 <CustomSelectBox { ...fromSelectedItem } handleClick={toggleFromDropdownIsOpen} />
 
                                 <CustomDropdownContainer 
-                                    dropdownItems={holdingsData} 
+                                    dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : accountTokens} 
                                     dropdownIsOpen={fromDropdownIsOpen}
                                     setDropdownIsOpen={setFromDropdownIsOpen}
                                     handleDropdownItemClick={setFromSelectedItem}
@@ -309,48 +330,46 @@ function ExchangeAlgo() {
                                     } */}
                                 </Styles.Info>
                             </div>
-                            <img src={exchangeLogo} alt="" />
+                            { liquiditySubtabValue !== REMOVE_LIQUIDITY && <img src={exchangeLogo} alt="" />}
                         </Styles.Container>
-                        <Styles.Container>
-                            <div className="innerContainer" style={{ padding: '20px 0' }}>
 
-                            
-                                <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} /> 
+                        { liquiditySubtabValue !== REMOVE_LIQUIDITY && (
+                            <Styles.Container>
+                                <div className="innerContainer" style={{ padding: '20px 0' }}>
 
-                                <CustomDropdownContainer 
-                                    dropdownItems={holdingsData} 
-                                    dropdownIsOpen={toDropdownIsOpen}
-                                    setDropdownIsOpen={setToDropdownIsOpen}
-                                    handleDropdownItemClick={setToSelectedItem}
-                                    handleSetInputValue={handleSetToInputValue}
-                                />
+                                    <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} /> 
 
-                                <CustomSelectInput 
-                                    placeholder="0.00" 
-                                    value={toInputValue}
-                                    onChange={handleToInputChange}
-                                    onFocus={handleToInputFocus}
-                                />
+                                    <CustomDropdownContainer 
+                                        dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : accountTokens} 
+                                        dropdownIsOpen={toDropdownIsOpen}
+                                        setDropdownIsOpen={setToDropdownIsOpen}
+                                        handleDropdownItemClick={setToSelectedItem}
+                                        handleSetInputValue={handleSetToInputValue}
+                                    />
 
-                                {/* { toSelectedItem && <Styles.PasteID onClick={resetToSelectedValues}>Paste Asset ID</Styles.PasteID> } */}
+                                    <CustomSelectInput 
+                                        placeholder="0.00" 
+                                        value={toInputValue}
+                                        onChange={handleToInputChange}
+                                        onFocus={handleToInputFocus}
+                                    />
 
-                                { toSelectedItem && <p>{getSwapValueStatus === HTTP_STATUS.REJECTED ? (swapValueError || 'Could not get equivelent value') : ''}</p> }
+                                    {/* { toSelectedItem && <Styles.PasteID onClick={resetToSelectedValues}>Paste Asset ID</Styles.PasteID> } */}
 
-                                { getSwapValueStatus === HTTP_STATUS.PENDING && (
-                                    <Styles.LoaderContainer2><ThreeDots height="80" width="80" color='gray' /></Styles.LoaderContainer2>
-                                )}
+                                    { toSelectedItem && <p>{swiftdexError ? (swiftdexError || 'Could not get equivelent value') : ''}</p> }
+
+                                    { swiftdexStatus === HTTP_STATUS.PENDING && (
+                                        <Styles.LoaderContainer2><ThreeDots height="80" width="80" color='gray' /></Styles.LoaderContainer2>
+                                    )}
+                                    
+                                </div>
                                 
-                                <Styles.Tinyman>
-                                    <span>POWERED BY TINYMAN</span>
-                                    <img src={tinymanLogo} alt="" />
-                                </Styles.Tinyman>
-                            </div>
-                            
-                        </Styles.Container>
+                            </Styles.Container>
+                        )}
                         <Styles.ButtonContainer>
                             <Button 
                                 fullWidth 
-                                disabled={ !formIsValid || (getSwapValueStatus === HTTP_STATUS.PENDING) || (getSwapValueStatus === HTTP_STATUS.REJECTED) } 
+                                // disabled={ !formIsValid || (swiftdexStatus === HTTP_STATUS.PENDING) || (swiftdexStatus === HTTP_STATUS.REJECTED) } 
                                 onClick={handleSwap}>
                                     { tabValue === SWAP 
                                         ? "swap" 

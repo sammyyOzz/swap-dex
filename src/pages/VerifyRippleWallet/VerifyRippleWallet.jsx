@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams, useLocation } from 'react-router'
 import { Button, CopyButton } from '../../components/UI/Button/button'
 // import AuthWrapper from '../../containers/AuthWrapper/AuthWrapper'
 import WalletWrapper from '../../containers/WalletWrapper/WalletWrapper'
@@ -35,9 +35,16 @@ function VerifyRippleWallet() {
 
     const { value: radioValue, handleClick: handleClickRadio } = useFormControlRadio('Mnemonic')
 
-    const account_ID = useSelector(state => state.swift.swiftAccount?.account_ID)
-    const mnemonic = useSelector(state => state.swift.swiftAccount?.mnemonic)
-    const privateKey = useSelector(state => state.swift.swiftAccount?.privateKey)
+    // const account_ID = useSelector(state => state.swift.swiftAccount?.account_ID)
+    // const mnemonic = useSelector(state => state.swift.swiftAccount?.mnemonic)
+    // const privateKey = useSelector(state => state.swift.swiftAccount?.privateKey)
+
+    const location = useLocation()
+
+    const urlQueryParams = new URLSearchParams(location.search)
+    const privateKey = urlQueryParams?.get('privateKey')
+    const account_ID = urlQueryParams?.get('account_ID')
+    const mnemonic = urlQueryParams?.get('mnemonic')
 
 
     const handlePasteSeed = () => {
@@ -116,7 +123,7 @@ function VerifyRippleWallet() {
 
     const handleSubmitForm = () => {
         if (option === 'create') {
-            localStorage.setItem('swift_dex', JSON.stringify(swiftAccount))
+            localStorage.setItem('swift_dex', JSON.stringify({ account_ID, privateKey, mnemonic }))
             navigate('/exchange')
             
         } else {

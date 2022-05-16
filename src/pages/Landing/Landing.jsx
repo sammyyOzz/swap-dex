@@ -23,7 +23,7 @@ function Landing() {
                 createAccount(),
                 (data) => {
                     saveAccountDetails(data)
-                    navigate('/wallet/create')
+                    navigate(`/wallet/create?account_ID=${data.account_ID}&privateKey=${data.privateKey}&mnemonic=${data.mnemonic}`)
                 },
                 err => {
                     setError('Something went wrong')

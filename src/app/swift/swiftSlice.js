@@ -30,6 +30,7 @@ const swiftSlice = createSlice({
     initialState: {
       swiftAccount: null,
       holdings: { ...DEFAULT, data: [{ TokenId: 0, Pair: 'Hbar', name: 'Algorand', unit: 'Algo', image: algorandLogo }] },
+      accountInfo: DEFAULT
     },
     reducers: {
         setAccountDatails(state) {
@@ -54,6 +55,17 @@ const swiftSlice = createSlice({
         [getLiquidityPool.rejected](state, { payload }) {
             state.holdings.status = HTTP_STATUS.REJECTED
             state.holdings.error = payload
+        },
+        [getAccountInfo.pending](state) {
+            state.accountInfo.status = HTTP_STATUS.PENDING
+        },
+        [getAccountInfo.fulfilled](state, { payload }) {
+            state.accountInfo.status = HTTP_STATUS.FULFILLED
+            state.accountInfo.data = payload
+        },
+        [getAccountInfo.rejected](state, { payload }) {
+            state.accountInfo.status = HTTP_STATUS.REJECTED
+            state.accountInfo.error = payload
         }
     }
 })
