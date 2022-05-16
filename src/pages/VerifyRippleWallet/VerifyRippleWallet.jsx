@@ -14,6 +14,10 @@ import useDisclaimer from '../../Hooks/Disclaimer'
 import { CONFIRMED, CREATE } from '../../constants/walletStatus'
 import { DEFAULT, ERROR, SUCCESS } from '../../constants/modalStatus'
 import { XRP } from '../../constants/network'
+import useFormControlRadio from '../../Hooks/FormControlRadio'
+import FormControlRadio from '../../components/FormControl/FormControlRadio'
+import useSubmit from '../../Hooks/Submit'
+import { importWithMnemonic, importWithPrivateKey } from '../../app/swift/swiftSlice'
 
 
 function VerifyRippleWallet() {
@@ -26,6 +30,8 @@ function VerifyRippleWallet() {
     const [buttonIsEnabled, setButtonIsEnabled] = useState(false)
     const [openModal, setOpenModal] = useState(false)
     const { checkbox, modalContentStatus, toggleCheckbox, handleModalStatus } = useDisclaimer()
+
+    const { value: radioValue, handleClick: handleClickRadio } = useFormControlRadio('Mnemonic')
 
 
     const handlePasteSeed = () => {
@@ -95,6 +101,26 @@ function VerifyRippleWallet() {
         handleCloseModal()
         navigate('/dashboard')
     }
+
+    
+
+    const { handleSubmit } = useSubmit()
+
+    const handleSubmitForm = () => {
+        if (option === 'create') {
+            alert('create wallet')
+        } else {
+            const accountID = JSON.parse(localStorage.getItem('swift_dex'))?.id
+            const data = radioValue === 'Mnemonic'
+                ? { id: accountID, mnemonic: xrpSeed }
+                : { id: accountID, key: xrpSeed }
+
+            const importType = radioValue === 'Mnemonic' ? importWithMnemonic : importWithPrivateKey
+
+            handleSubmit(importType(data))
+
+        }
+    }
     
 
     return (
@@ -105,6 +131,16 @@ function VerifyRippleWallet() {
                 link={`/create-wallet/${XRP}`}
             >
                 <Styles.Container>
+                    {
+                        option === 'import' && (
+                            <FormControlRadio
+                                label="Import with"  
+                                options={['Mnemonic', 'Private key']}
+                                value={radioValue}
+                                handleClick={handleClickRadio}
+                            />
+                        )
+                    }
                     <Styles.XrpWordsBox>
                         { option === 'create' 
                             ? 'this is the string that contains the passphrase'
@@ -120,7 +156,8 @@ function VerifyRippleWallet() {
                         <Button 
                             fullWidth 
                             disabled={!buttonIsEnabled} 
-                            onClick={showDisclaimerModal}
+                            // onClick={showDisclaimerModal}
+                            onClick={handleSubmitForm}
                         >   
                             { option === 'create' ? 'proceed' : 'import' }
                         </Button>

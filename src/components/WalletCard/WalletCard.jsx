@@ -32,4 +32,4 @@ function WalletCard({ icon, walletSetup, buttonText, title, text, image, link, h
     )
 }
 
-export default React.memo(WalletCard)
+export default WalletCard
