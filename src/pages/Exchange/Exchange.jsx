@@ -18,8 +18,7 @@ import useFormControl from '../../Hooks/FormControl'
 import { useSearchAssetByIdCompare } from '../../Hooks/SearchAssetById'
 import useTabs from '../../Hooks/Tabs'
 import MyTabs from '../../components/MyTabs/MyTabs'
-import tinymanLogo from '../../assets/icons/tinyman.svg'
-import { hbarToToken, tokenToHbar } from '../../app/swift/swiftSlice'
+import { addLiquidity, createPair, getHbarAmount, getTokenAmount, hbarToToken, removeLiquidity, tokenToHbar } from '../../app/swift/swiftSlice'
 
 const SWAP = "Swap"
 const LIQUIDITY = "Liquidity"
@@ -72,7 +71,7 @@ function ExchangeAlgo() {
     const { formIsValid } = useFormValidity(fromInputValue, toInputValue)
     const { handleSubmit } = useSubmit()
     const { status: getSwapValueStatus, error: errorMessage } = useSelector(state => state.algorand.swapValue)
-    const swapValueError = errorMessage?.error
+    // const swapValueError = errorMessage?.error
     const { data: holdingsData } = useSelector(state => state.swift.holdings)
     const { modalState, handleModalOpen, handleModalClose } = useModal()
 
@@ -106,8 +105,53 @@ function ExchangeAlgo() {
         //     phrase: passphrase
         // }
 
-        const data = liquiditySubtabValue === ADD_LIQUIDITY
-            ? { tid: fromSelectedItem.TokenId } : ""
+        if (tabValue === LIQUIDITY && liquiditySubtabValue === ADD_LIQUIDITY) {
+            dispatch(addLiquidity({ 
+                tid: fromSelectedItem.TokenId || toSelectedItem.TokenId, 
+                tamount: fromSelectedItem.TokenId ? fromInputValue : toInputValue,
+                hamount: fromSelectedItem.TokenId ? toInputValue : fromInputValue, 
+                acctid: swiftAccount?.account_ID,
+                acctkey: swiftAccount?.privateKey
+            }))
+        } else if (tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR) {
+            dispatch(createPair({ 
+                tid: fromSelectedItem.TokenId || toSelectedItem.TokenId, 
+                tamount: fromSelectedItem.TokenId ? fromInputValue : toInputValue,
+                hamount: fromSelectedItem.TokenId ? toInputValue : fromInputValue,
+                acctid: swiftAccount?.account_ID,
+                acctkey: swiftAccount?.privateKey
+            }))
+        } else if (tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) {
+            dispatch(removeLiquidity({
+                tid: fromSelectedItem.TokenId, 
+                tamount: fromInputValue,
+                acctid: swiftAccount?.account_ID,
+                acctkey: swiftAccount?.privateKey
+            }))
+        } else if (tabValue === SWAP && fromSelectedItem.TokenId == 0) {
+            dispatch(hbarToToken({ 
+                tid: toSelectedItem.TokenId,
+                hamount: fromInputValue,
+                acctid: swiftAccount?.account_ID,
+                acctkey: swiftAccount?.privateKey
+            }))
+        } else if (tabValue === SWAP && fromSelectedItem.TokenId != 0) {
+            dispatch(tokenToHbar({
+                tid: fromSelectedItem.TokenId,
+                tamount: fromInputValue,
+                acctid: swiftAccount?.account_ID,
+                acctkey: swiftAccount?.privateKey
+            }))
+        } else if (tabValue === SWAP && fromSelectedItem.TokenId != 0 && toSelectedItem.TokenId != 0) {
+            dispatch(tokenToHbar({
+                fromid: fromSelectedItem.TokenId,
+                toid: toSelectedItem.TokenId,
+                tamount: fromInputValue,
+                acctid: swiftAccount?.account_ID,
+                acctkey: swiftAccount?.privateKey
+            }))
+        }
+             
 
         // const dispatchAlgoAction = tabValue === SWAP ? swapAlgorand : algorandLiquidity
         
@@ -123,9 +167,9 @@ function ExchangeAlgo() {
     const success = status === HTTP_STATUS.FULFILLED
 
 
-    useEffect(() => {
-        return () => dispatch(resetSwapValueData())
-    }, [])
+    // useEffect(() => {
+    //     return () => dispatch(resetSwapValueData())
+    // }, [])
 
 
     /**
@@ -150,7 +194,7 @@ function ExchangeAlgo() {
         asset_amount: fromSelectedItem.TokenId === swapIds.from ? parseFloat(fromInputValue) : parseFloat(toInputValue),
         phrase: passphrase
     }
-    console.log(swapData)
+    // console.log(swapData)
 
     /**
      * get equivelent value of other asset to swap to/from and set the value 
@@ -169,7 +213,7 @@ function ExchangeAlgo() {
 
                 if (swapData.from_asset == 0) {
                     setSwiftdexStatus(HTTP_STATUS.PENDING)
-                    dispatch(hbarToToken({
+                    dispatch(getTokenAmount({
                         tid: swapData.to_asset,
                         hamount: swapData.asset_amount,
                         acctid: swiftAccount?.account_ID,
@@ -179,7 +223,8 @@ function ExchangeAlgo() {
                     .then(data => {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
-                         setSwiftdexError(data)
+                        handleSetToInputValue(data["Token Amount"])
+                        
                     })
                     .catch(err => {
                         console.log(err)
@@ -188,7 +233,7 @@ function ExchangeAlgo() {
                     })
                 } else if (swapData.to_asset == 0) {
                     setSwiftdexStatus(HTTP_STATUS.PENDING)
-                    dispatch(tokenToHbar({
+                    dispatch(getHbarAmount({
                         tid: swapData.from_asset,
                         tamount: swapData.asset_amount,
                         acctid: swiftAccount?.account_ID,
@@ -198,7 +243,7 @@ function ExchangeAlgo() {
                     .then(data => {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
-                        if (typeof(data) === 'string') setSwiftdexError(data)
+                        handleSetFromInputValue(data["Hbar Amount"])
                     })
                     .catch(err => {
                         setSwiftdexStatus(HTTP_STATUS.REJECTED)
@@ -207,15 +252,28 @@ function ExchangeAlgo() {
                     })
 
                 } else if ((swapData.from_asset != 0) && (swapData.to_asset != 0)) {
-                    dispatch(tokenToHbar({
+                    setSwiftdexStatus(HTTP_STATUS.PENDING)
+                    dispatch(getHbarAmount({
                         tid: swapData.from_asset,
                         tamount: swapData.asset_amount,
-                        acctid: '',
-                        acctkey: ''
+                        acctid: swiftAccount?.account_ID,
+                        acctkey: swiftAccount?.privateKey
                     }))
                     .unwrap()
                     .then(data => {
                         console.log(data)
+                        dispatch(getTokenAmount({
+                            tid: swapData.to_asset,
+                            hamount: data['Hbar Amount'],
+                            acctid: swiftAccount?.account_ID,
+                            acctkey: swiftAccount?.privateKey
+                        }))
+                        .unwrap()
+                        .then(data => {
+                            setSwiftdexStatus(HTTP_STATUS.FULFILLED)
+                            console.log('final result', data)
+                            handleSetToInputValue(data["Token Amount"])
+                        })
                     })
                     .catch(err => {
                         console.log(err)
@@ -330,10 +388,10 @@ function ExchangeAlgo() {
                                     } */}
                                 </Styles.Info>
                             </div>
-                            { liquiditySubtabValue !== REMOVE_LIQUIDITY && <img src={exchangeLogo} alt="" />}
+                            { !(tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) && <img src={exchangeLogo} alt="" />}
                         </Styles.Container>
 
-                        { liquiditySubtabValue !== REMOVE_LIQUIDITY && (
+                        { !(tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) && (
                             <Styles.Container>
                                 <div className="innerContainer" style={{ padding: '20px 0' }}>
 
