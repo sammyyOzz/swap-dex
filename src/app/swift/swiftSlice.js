@@ -28,11 +28,18 @@ const DEFAULT = { status: null, data: null, error: null }
 const swiftSlice = createSlice({
     name: 'swift',
     initialState: {
-      swift: null,
+      swiftAccount: null,
       holdings: { ...DEFAULT, data: [{ TokenId: 0, Pair: 'Hbar', name: 'Algorand', unit: 'Algo', image: algorandLogo }] },
     },
     reducers: {
-      
+        setAccountDatails(state) {
+            if (localStorage.getItem('swift_dex')) {
+                state.swiftAccount = JSON.parse(localStorage.getItem('swift_dex'))
+            }
+        },
+        saveAccountDetails(state, { payload }) {
+            state.swiftAccount = payload
+        }
     },
 
     extraReducers: {
@@ -50,6 +57,8 @@ const swiftSlice = createSlice({
         }
     }
 })
+
+export const { setAccountDatails, saveAccountDetails } = swiftSlice.actions
   
 
 export default swiftSlice.reducer

@@ -1,23 +1,33 @@
 import { Grid } from '@mui/material'
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import WalletCard from '../../components/WalletCard/WalletCard'
 import * as Styles from './landing'
 import { useDispatch } from 'react-redux'
-import { createAccount } from '../../app/swift/swiftSlice'
+import { createAccount, saveAccountDetails } from '../../app/swift/swiftSlice'
+import useSubmit from '../../Hooks/Submit'
 
 function Landing() {
+    const navigate = useNavigate()
     const dispatch = useDispatch()
+    const { handleSubmit } = useSubmit()
 
     const handleCreateWallet = () => {
         if (localStorage.getItem('swift_dex')) {
             return
         } else {
-            dispatch(createAccount())
-            .unwrap()
-            .then(data => {
-                console.log(data)
-            })
+            
+            handleSubmit(
+                createAccount(),
+                (data) => {
+                    localStorage.setItem('swift_dex', JSON.stringify(data));
+                    saveAccountDetails(data)
+                    navigate('/wallet/create')
+                },
+                err => {
+                    console.log(err)
+                }
+            )
         }
 
     }

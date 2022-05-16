@@ -33,6 +33,9 @@ function VerifyRippleWallet() {
 
     const { value: radioValue, handleClick: handleClickRadio } = useFormControlRadio('Mnemonic')
 
+    const mnemonic = useSelector(state => state.swift.swiftAccount?.mnemonic)
+    const privateKey = useSelector(state => state.swift.swiftAccount?.privateKey)
+
 
     const handlePasteSeed = () => {
         navigator.clipboard.readText().then(text => setXrpSeed(text))
@@ -108,7 +111,7 @@ function VerifyRippleWallet() {
 
     const handleSubmitForm = () => {
         if (option === 'create') {
-            alert('create wallet')
+            navigate('/exchange')
         } else {
             const accountID = JSON.parse(localStorage.getItem('swift_dex'))?.id
             const data = radioValue === 'Mnemonic'
@@ -117,7 +120,10 @@ function VerifyRippleWallet() {
 
             const importType = radioValue === 'Mnemonic' ? importWithMnemonic : importWithPrivateKey
 
-            handleSubmit(importType(data))
+            handleSubmit(
+                importType(data),
+                () => navigate('/exchange')
+            )
 
         }
     }
@@ -127,7 +133,7 @@ function VerifyRippleWallet() {
         // <AuthWrapper>
             <WalletWrapper
                 title={option === 'create' ? 'CREATE NEW WALLET' : 'IMPORT WALLET'}
-                description="Please paste the seed you copied. This is to verify you did a backup."
+                description="Ensure you copy and backup the private key shown below."
                 link={`/create-wallet/${XRP}`}
             >
                 <Styles.Container>
@@ -143,7 +149,13 @@ function VerifyRippleWallet() {
                     }
                     <Styles.XrpWordsBox>
                         { option === 'create' 
-                            ? 'this is the string that contains the passphrase'
+                            ? <>
+                                <p><b>Private key:</b></p>
+                                <p>{privateKey}</p>
+
+                                <p><b>Mnemonic:</b></p>
+                                <p>{mnemonic}</p>
+                            </>
                             : <textarea value={xrpSeed} onChange={e => setXrpSeed(e.target.value)} />
                         }
                     </Styles.XrpWordsBox>
@@ -155,7 +167,7 @@ function VerifyRippleWallet() {
                         
                         <Button 
                             fullWidth 
-                            disabled={!buttonIsEnabled} 
+                            // disabled={!buttonIsEnabled} 
                             // onClick={showDisclaimerModal}
                             onClick={handleSubmitForm}
                         >   
