@@ -3,22 +3,22 @@ import * as Styles from './customSelect'
 import { HTTP_STATUS } from '../../constants/httpStatus';
 import { LoaderContainer } from '../../pages/Exchange/exchange';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAlgorandHoldings } from '../../app/algorand/algorandSlice';
 import useCheckImageExists from '../../Hooks/checkImageExists';
 import { Grid } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { ThreeDots } from 'react-loader-spinner'
+import { getLiquidityPool } from '../../app/swift/swiftSlice';
 
 
-export function CustomSelectBox({ id, name, unit, handleClick, isDropdownItem }) {
-    const { tinyManAssetImage } = useCheckImageExists({ id })
+export function CustomSelectBox({ TokenId, Pair, unit, handleClick, isDropdownItem }) {
+    const { tinyManAssetImage } = useCheckImageExists({ id: TokenId })
 
     return (
         <Styles.SelectionBox dropdownItem={isDropdownItem} onClick={handleClick}>
             <Styles.Logo src={tinyManAssetImage} alt="" />
             <Styles.NameBox>
-                <div className="title">{name}</div>
-                <div className="subtitle">{`$${unit} ${id !== 0 ? '-' : ''} ${id !== 0 ? id : ''} `}</div>
+                <div className="title">{Pair?.split('/')[0]}</div>
+                <div className="subtitle">{`$${Pair?.split('/')[0]}`}</div>
             </Styles.NameBox>
         </Styles.SelectionBox>
     )
@@ -28,7 +28,7 @@ export function CustomDropdownContainer(props) {
     const { dropdownIsOpen, dropdownItems, setDropdownIsOpen, handleDropdownItemClick, handleSetInputValue, inputValueToSet, searchStatus, ...otherProps } = props
     
     const dispatch = useDispatch()
-    const { status: holdingsStatus } = useSelector(state => state.algorand.holdings)
+    const { status: holdingsStatus } = useSelector(state => state.swift.holdings)
 
     const handleItemClick = (dropdownItem) => {
         handleDropdownItemClick(dropdownItem)
@@ -38,19 +38,19 @@ export function CustomDropdownContainer(props) {
 
     useEffect(() => {
         if (dropdownIsOpen && (holdingsStatus === null)) {
-            dispatch(getAlgorandHoldings())
+            dispatch(getLiquidityPool())
         }
     }, [dropdownIsOpen])
 
     return (
         // <ClickAwayListener onClickAway={() => dropdownIsOpen && setDropdownIsOpen(false)}>
             <Styles.DropdownContainer open={dropdownIsOpen} { ...otherProps }>
-                { dropdownItems.length > 0 ? dropdownItems.map(({ id, ...dropdownItemDetails }) => (
+                { dropdownItems.length > 0 ? dropdownItems.map(({ TokenId, ...dropdownItemDetails }) => (
                     <CustomSelectBox 
-                        key={id} 
-                        id={id}
+                        key={TokenId} 
+                        id={TokenId}
                         isDropdownItem 
-                        handleClick={() => handleItemClick({ id, ...dropdownItemDetails })}
+                        handleClick={() => handleItemClick({ TokenId, ...dropdownItemDetails })}
                         { ...dropdownItemDetails } 
                     />
                 )) : (

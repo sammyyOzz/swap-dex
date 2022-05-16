@@ -1,5 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { HTTP_STATUS } from '../../constants/httpStatus'
 import { asyncRequest } from '../services'
+import algorandLogo from '../../assets/icons/algorandLogo.png'
+
 
 const namespace = 'swift'
 
@@ -20,18 +23,31 @@ export const getHbarAmount = asyncRequest(`${namespace}/getHbarAmount`, '/gethba
  */
 export const getAccountInfo = asyncRequest(`${namespace}/getAccountInfo`, '/info/:id ', 'get')
 
+const DEFAULT = { status: null, data: null, error: null }
 
 const swiftSlice = createSlice({
     name: 'swift',
     initialState: {
       swift: null,
+      holdings: { ...DEFAULT, data: [{ TokenId: 0, Pair: 'Hbar', name: 'Algorand', unit: 'Algo', image: algorandLogo }] },
     },
-    // reducers: {
+    reducers: {
       
-    // },
+    },
 
     extraReducers: {
-
+        [getLiquidityPool.pending](state) {
+            state.holdings.status = HTTP_STATUS.PENDING
+        },
+        [getLiquidityPool.fulfilled](state, { payload }) {
+            state.holdings.status = HTTP_STATUS.FULFILLED
+            const defaultHoldings = state.holdings.data
+            state.holdings.data = [...defaultHoldings, ...payload.Pools]
+        },
+        [getLiquidityPool.rejected](state, { payload }) {
+            state.holdings.status = HTTP_STATUS.REJECTED
+            state.holdings.error = payload
+        }
     }
 })
   

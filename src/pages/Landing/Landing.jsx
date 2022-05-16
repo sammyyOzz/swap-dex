@@ -16,7 +16,7 @@ function Landing() {
             dispatch(createAccount())
             .unwrap()
             .then(data => {
-                alert(data)
+                console.log(data)
             })
         }
 

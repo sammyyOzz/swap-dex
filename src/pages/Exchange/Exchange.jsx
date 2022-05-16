@@ -19,17 +19,31 @@ import { useSearchAssetByIdCompare } from '../../Hooks/SearchAssetById'
 import useTabs from '../../Hooks/Tabs'
 import MyTabs from '../../components/MyTabs/MyTabs'
 import tinymanLogo from '../../assets/icons/tinyman.svg'
+import { hbarToToken, tokenToHbar } from '../../app/swift/swiftSlice'
 
 const SWAP = "Swap"
 const LIQUIDITY = "Liquidity"
 
+//subtabs
+const ADD_LIQUIDITY = "Add liquidity"
+const CREATE_PAIR = "Create Pair"
+const REMOVE_LIQUIDITY = "Remove liquidity"
+
 const tabs = [SWAP, LIQUIDITY]
+
+const liquiditySubtabs = [ADD_LIQUIDITY, CREATE_PAIR, REMOVE_LIQUIDITY]
+
 
 function ExchangeAlgo() {
     const { tabValue, handleTabChange } = useTabs(tabs[0])
+    const { 
+        tabValue: liquiditySubtabValue, 
+        handleTabChange: handleLiquiditySubTabChange 
+    } = useTabs(liquiditySubtabs[0])
+
     const dispatch = useDispatch()
     // const network = useSelector(state => state.network.network)
-    const { data: activeWalletData } = useSelector(state => state.algorand.activeWallet);
+    // const { data: activeWalletData } = useSelector(state => state.algorand.activeWallet);
     const passphrase = useSelector(state => state.algorand.passphrase)
 
     const {
@@ -39,29 +53,29 @@ function ExchangeAlgo() {
         setDropdownIsOpen: setFromDropdownIsOpen,
         toggleDropdownIsOpen: toggleFromDropdownIsOpen,
     } = useCustomSelect('initializeAsFilled')
-
+    
     const {
         selectedItem: toSelectedItem,
         setSelectedItem: setToSelectedItem,
         dropdownIsOpen: toDropdownIsOpen,
         setDropdownIsOpen: setToDropdownIsOpen,
         toggleDropdownIsOpen: toggleToDropdownIsOpen,
-    } = useCustomSelect('initializeAsEmpty')
+    } = useCustomSelect('initializeAsFilled')
 
     const { value: fromInputValue, handleChange: handleFromInputChange, handleSetValue: handleSetFromInputValue } = useFormControl()
     const { value: toInputValue, handleChange: handleToInputChange, handleSetValue: handleSetToInputValue } = useFormControl()
 
-    const [swapIds, setSwapIds] = useState({ from: fromSelectedItem.id, to: toSelectedItem.id })
+    const [swapIds, setSwapIds] = useState({ from: fromSelectedItem.TokenId, to: toSelectedItem.TokenId })
 
     const { formIsValid } = useFormValidity(fromInputValue, toInputValue)
     const { handleSubmit } = useSubmit()
     const { status: getSwapValueStatus, error: errorMessage } = useSelector(state => state.algorand.swapValue)
     const swapValueError = errorMessage?.error
-    const { data: holdingsData } = useSelector(state => state.algorand.holdings)
+    const { data: holdingsData } = useSelector(state => state.swift.holdings)
     const { modalState, handleModalOpen, handleModalClose } = useModal()
 
     const resetValues = () => {
-        setFromSelectedItem({ id: 0, name: 'Algorand', amount: 0, unit: 'Algo' })
+        setFromSelectedItem({ TokenId: 0, Pair: 'Hbar', amount: 0, unit: 'Algo' })
         setToSelectedItem("")
         handleSetFromInputValue("")
         handleSetToInputValue("")
@@ -75,8 +89,8 @@ function ExchangeAlgo() {
 
     const handleSwap = () => {
         const data = {
-            from_asset: fromSelectedItem.id, 
-            to_asset: toSelectedItem.id,
+            from_asset: fromSelectedItem.TokenId, 
+            to_asset: toSelectedItem.TokenId,
             asset_amount: parseFloat(fromInputValue),
             phrase: passphrase
         }
@@ -103,23 +117,23 @@ function ExchangeAlgo() {
     /**
      * send check request on to asset ID input change
      */
-    const { status: toAssetIsValidStatus, data: toAssetIsValidData } = useSearchAssetByIdCompare(toInputValue, { asset_id: toInputValue }, checkAlgorandAssetIsValid, 'includes')
+    // const { status: toAssetIsValidStatus, data: toAssetIsValidData } = useSearchAssetByIdCompare(toInputValue, { asset_id: toInputValue }, checkAlgorandAssetIsValid, 'includes')
     
-    const [searchedAssets, setSearchedAssets] = useState([])
-    const concatAssetArray = holdingsData.concat(searchedAssets)
+    // const [searchedAssets, setSearchedAssets] = useState([])
 
-    useEffect(() => {
-        if (toAssetIsValidData) {
-            if (!holdingsData.includes(toAssetIsValidData) && !searchedAssets.includes(toAssetIsValidData)) {
-                setSearchedAssets(prevState => [...prevState, toAssetIsValidData])
-            }
-        }
-    }, [toAssetIsValidData])
+
+    // useEffect(() => {
+    //     if (toAssetIsValidData) {
+    //         if (!holdingsData.includes(toAssetIsValidData) && !searchedAssets.includes(toAssetIsValidData)) {
+    //             setSearchedAssets(prevState => [...prevState, toAssetIsValidData])
+    //         }
+    //     }
+    // }, [toAssetIsValidData])
 
     const swapData = {
-        from_asset: fromSelectedItem.id === swapIds.from ? fromSelectedItem.id : toSelectedItem.id, 
-        to_asset: fromSelectedItem.id !== swapIds.from ? fromSelectedItem.id : toSelectedItem.id,
-        asset_amount: fromSelectedItem.id === swapIds.from ? parseFloat(fromInputValue) : parseFloat(toInputValue),
+        from_asset: fromSelectedItem.TokenId === swapIds.from ? fromSelectedItem.TokenId : toSelectedItem.TokenId, 
+        to_asset: fromSelectedItem.TokenId !== swapIds.from ? fromSelectedItem.TokenId : toSelectedItem.TokenId,
+        asset_amount: fromSelectedItem.TokenId === swapIds.from ? parseFloat(fromInputValue) : parseFloat(toInputValue),
         phrase: passphrase
     }
 
@@ -129,11 +143,48 @@ function ExchangeAlgo() {
      useEffect(() => {
         const inputRateTimer = setTimeout(() => {
 
-            if ((swapData.asset_amount > 0) && (fromSelectedItem.id !== toSelectedItem.id)) {
+            if ((swapData.asset_amount > 0) && (fromSelectedItem.TokenId !== toSelectedItem.TokenId)) {
+                if (
+                    ((tabValue === LIQUIDITY) && (liquiditySubtabValue === CREATE_PAIR)) ||
+                    ((tabValue === LIQUIDITY) && (liquiditySubtabValue === REMOVE_LIQUIDITY))
+                ) {
+                    return
+                }
+
+
+                if (swapData.from_asset.TokenId == 0) {
+                    dispatch(hbarToToken({
+                        tid: swapData.to_asset,
+                        hamount: swapData.asset_amount,
+                        acctid: '',
+                        acctkey: ''
+                    }))
+                    .unwrap()
+                } else if (swapData.to_asset == 0) {
+                    dispatch(tokenToHbar({
+                        tid: swapData.from_asset,
+                        tamount: swapData.asset_amount,
+                        acctid: '',
+                        acctkey: ''
+                    }))
+                    .unwrap()
+
+                } else if ((swapData.from_asset != 0) && (swapData.to_asset != 0)) {
+                    dispatch(tokenToHbar({
+                        tid: swapData.from_asset,
+                        tamount: swapData.asset_amount,
+                        acctid: '',
+                        acctkey: ''
+                    }))
+                    .unwrap()
+
+                    //then result to token
+                }
+
                 dispatch(getAlgorandSwapValue(swapData))
                 .unwrap()
                 .then(swapAmount => {
-                    if (fromSelectedItem.id === swapIds.from) {
+                    if (fromSelectedItem.TokenId === swapIds.from) {
                         handleSetToInputValue(swapAmount)
                     } else {
                         handleSetFromInputValue(swapAmount)
@@ -144,15 +195,15 @@ function ExchangeAlgo() {
         }, 1000)
 
         return () => clearTimeout(inputRateTimer)
-    }, [swapData.asset_amount, fromSelectedItem.id, toSelectedItem.id])
+    }, [swapData.asset_amount, fromSelectedItem.TokenId, toSelectedItem.TokenId])
 
     useEffect(() => {
         if (tabValue === SWAP) handleSetToInputValue("")
-    }, [fromSelectedItem.id])
+    }, [fromSelectedItem.Id])
 
     useEffect(() => {
         if (tabValue === SWAP) handleSetFromInputValue("")
-    }, [toSelectedItem.id])
+    }, [toSelectedItem.TokenId])
 
     const resetToSelectedValues = () => {
         setToSelectedItem("")
@@ -160,12 +211,12 @@ function ExchangeAlgo() {
     }
 
     const handleFromInputFocus = () => {
-        setSwapIds({ from: fromSelectedItem.id, to: toSelectedItem.id })
+        setSwapIds({ from: fromSelectedItem.TokenId, to: toSelectedItem.TokenId })
         handleSetToInputValue("")
     }
 
     const handleToInputFocus = () => {
-        setSwapIds({ from: toSelectedItem.id, to: fromSelectedItem.id })
+        setSwapIds({ from: toSelectedItem.TokenId, to: fromSelectedItem.TokenId })
         if (tabValue === SWAP) handleSetFromInputValue("")
     }
 
@@ -188,7 +239,14 @@ function ExchangeAlgo() {
                         <Styles.Text>
                             { tabValue === SWAP 
                                 ? "Token should be added to your wallet before swapping." 
-                                : "Add liquidity to an already existing pool." 
+                                : (
+                                    <MyTabs
+                                        tabs={liquiditySubtabs}
+                                        tabValue={liquiditySubtabValue}
+                                        handleTabChange={handleLiquiditySubTabChange}
+                                        center
+                                    />
+                                )
                             }
                         </Styles.Text>
                         <Styles.Line />
@@ -215,11 +273,11 @@ function ExchangeAlgo() {
                                 />
 
                                 <Styles.Info>
-                                    Balance:&nbsp; 
+                                    {/* Balance:&nbsp; 
                                     { fromSelectedItem.id === 0 ? 
                                         <strong>{activeWalletData?.balance}</strong> : 
                                         <strong>{holdingsData?.filter(asset => asset.id === fromSelectedItem.id)[0]?.amount}</strong> 
-                                    }
+                                    } */}
                                 </Styles.Info>
                             </div>
                             <img src={exchangeLogo} alt="" />
@@ -228,29 +286,24 @@ function ExchangeAlgo() {
                             <div className="innerContainer" style={{ padding: '20px 0' }}>
 
                             
-                                {  toSelectedItem ? <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} /> : null }
+                                <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} /> 
 
                                 <CustomDropdownContainer 
-                                    lower
-                                    dropdownItems={
-                                        !toSelectedItem ? concatAssetArray.filter(item => item.id.toString().includes(toInputValue.toString().trim())) : concatAssetArray
-                                    } 
+                                    dropdownItems={holdingsData} 
                                     dropdownIsOpen={toDropdownIsOpen}
                                     setDropdownIsOpen={setToDropdownIsOpen}
                                     handleDropdownItemClick={setToSelectedItem}
                                     handleSetInputValue={handleSetToInputValue}
-                                    searchStatus={toAssetIsValidStatus}
                                 />
 
                                 <CustomSelectInput 
-                                    smallerPlaceholderSize={!toSelectedItem}
-                                    placeholder={!toSelectedItem ? "Select a token, or paste the ID" : "0.00"} 
-                                    onClick={() => !toSelectedItem && setToDropdownIsOpen(prevState => !prevState)}
+                                    placeholder="0.00" 
                                     value={toInputValue}
                                     onChange={handleToInputChange}
                                     onFocus={handleToInputFocus}
                                 />
-                                { toSelectedItem && <Styles.PasteID onClick={resetToSelectedValues}>Paste Asset ID</Styles.PasteID> }
+
+                                {/* { toSelectedItem && <Styles.PasteID onClick={resetToSelectedValues}>Paste Asset ID</Styles.PasteID> } */}
 
                                 { toSelectedItem && <p>{getSwapValueStatus === HTTP_STATUS.REJECTED ? (swapValueError || 'Could not get equivelent value') : ''}</p> }
 

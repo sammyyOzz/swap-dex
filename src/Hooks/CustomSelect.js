@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 const defaultValues = {
-    initializeAsFilled : { id: 0, name: 'Algorand', amount: 0, unit: 'Algo' },
+    initializeAsFilled : { TokenId: 0, Pair: 'Hbar', name: 'Hbar', amount: 0, unit: 'Hbar' },
     initializeAsEmpty: ""
 }
 
