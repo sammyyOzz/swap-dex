@@ -3,3 +3,4 @@ export const HTTP_STATUS = Object.freeze({
     FULFILLED: 'FULFILLED',
     REJECTED: 'REJECTED',
 })
+  

@@ -1,0 +1,2 @@
+export const MY_ALGORAND_PASSPHRASE = JSON.parse(localStorage.getItem('algophrase'))?.split(" ")?.filter(item => item) || []
+export const MY_ALGORAND_PASSPHRASE_STRING = MY_ALGORAND_PASSPHRASE.join(" ")

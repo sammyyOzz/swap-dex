@@ -7,10 +7,11 @@ export const Root = styled.div`
     background-color: white;
     padding: 20px 0 150px 0;
     border-radius: 20px;
+    border: 1px solid green;
 
-    @media(max-width: 1200px) {
+    /* @media(max-width: 1200px) {
         margin-top: 150px;
-    }
+    } */
 `
 
 export const Title = styled.h2`
@@ -33,7 +34,7 @@ export const Line = styled.hr`
 
 export const Container = styled.div`
     width: calc(100% - 40px);
-    background-color: #F5FEFA;
+    background-color: rgb(190, 250, 190);
     border-radius: 20px;
     margin: auto auto 16px auto;
     padding: 20px 0 5px 0;
