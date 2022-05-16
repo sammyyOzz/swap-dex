@@ -10,6 +10,7 @@ import Landing from './pages/Landing/Landing';
 import NotFound from './pages/NotFound/NotFound'
 import { useDispatch } from 'react-redux';
 import { setAccountDatails } from './app/swift/swiftSlice';
+import { Header } from './components/Navigation/header.component';
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
   return (
     <Router>
       <Backdrop />
+      <Header />
       <div className="App">
         <Routes>
           <Route path="/" element={<Landing />} />

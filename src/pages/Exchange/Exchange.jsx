@@ -53,6 +53,8 @@ function ExchangeAlgo() {
         setDropdownIsOpen: setFromDropdownIsOpen,
         toggleDropdownIsOpen: toggleFromDropdownIsOpen,
     } = useCustomSelect('initializeAsFilled')
+
+    // console.log(fromSelectedItem)
     
     const {
         selectedItem: toSelectedItem,
@@ -73,6 +75,8 @@ function ExchangeAlgo() {
     const swapValueError = errorMessage?.error
     const { data: holdingsData } = useSelector(state => state.swift.holdings)
     const { modalState, handleModalOpen, handleModalClose } = useModal()
+
+    const swiftAccount = useSelector(state => state.swift.swiftAccount)
 
     const resetValues = () => {
         setFromSelectedItem({ TokenId: 0, Pair: 'Hbar', amount: 0, unit: 'Algo' })
@@ -136,6 +140,7 @@ function ExchangeAlgo() {
         asset_amount: fromSelectedItem.TokenId === swapIds.from ? parseFloat(fromInputValue) : parseFloat(toInputValue),
         phrase: passphrase
     }
+    console.log(swapData)
 
     /**
      * get equivelent value of other asset to swap to/from and set the value 
@@ -152,22 +157,31 @@ function ExchangeAlgo() {
                 }
 
 
-                if (swapData.from_asset.TokenId == 0) {
+                if (swapData.from_asset == 0) {
                     dispatch(hbarToToken({
                         tid: swapData.to_asset,
                         hamount: swapData.asset_amount,
-                        acctid: '',
-                        acctkey: ''
+                        acctid: swiftAccount?.account_ID,
+                        acctkey: swiftAccount?.privateKey
                     }))
                     .unwrap()
+                    .then(data => {
+                        console.log(data)
+                    })
                 } else if (swapData.to_asset == 0) {
                     dispatch(tokenToHbar({
                         tid: swapData.from_asset,
                         tamount: swapData.asset_amount,
-                        acctid: '',
-                        acctkey: ''
+                        acctid: swiftAccount?.account_ID,
+                        acctkey: swiftAccount?.privateKey
                     }))
                     .unwrap()
+                    .then(data => {
+                        console.log(data)
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
 
                 } else if ((swapData.from_asset != 0) && (swapData.to_asset != 0)) {
                     dispatch(tokenToHbar({
@@ -177,20 +191,26 @@ function ExchangeAlgo() {
                         acctkey: ''
                     }))
                     .unwrap()
+                    .then(data => {
+                        console.log(data)
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
 
                     //then result to token
                 }
 
-                dispatch(getAlgorandSwapValue(swapData))
-                .unwrap()
-                .then(swapAmount => {
-                    if (fromSelectedItem.TokenId === swapIds.from) {
-                        handleSetToInputValue(swapAmount)
-                    } else {
-                        handleSetFromInputValue(swapAmount)
-                    }
-                })
-                .catch(err => console.log(err))
+                // dispatch(getAlgorandSwapValue(swapData))
+                // .unwrap()
+                // .then(swapAmount => {
+                //     if (fromSelectedItem.TokenId === swapIds.from) {
+                //         handleSetToInputValue(swapAmount)
+                //     } else {
+                //         handleSetFromInputValue(swapAmount)
+                //     }
+                // })
+                // .catch(err => console.log(err))
             }
         }, 1000)
 

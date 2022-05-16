@@ -17,7 +17,7 @@ import { XRP } from '../../constants/network'
 import useFormControlRadio from '../../Hooks/FormControlRadio'
 import FormControlRadio from '../../components/FormControl/FormControlRadio'
 import useSubmit from '../../Hooks/Submit'
-import { importWithMnemonic, importWithPrivateKey } from '../../app/swift/swiftSlice'
+import { importWithMnemonic, importWithPrivateKey, saveAccountDetails } from '../../app/swift/swiftSlice'
 
 
 function VerifyRippleWallet() {
@@ -122,7 +122,11 @@ function VerifyRippleWallet() {
 
             handleSubmit(
                 importType(data),
-                () => navigate('/exchange')
+                () => {
+                    localStorage.setItem('swift_dex', JSON.stringify(data));
+                    saveAccountDetails(data)
+                    navigate('/exchange')
+                }
             )
 
         }
