@@ -8,17 +8,24 @@ import Exchange from './pages/Exchange/Exchange'
 import VerifyRippleWallet from './pages/VerifyRippleWallet/VerifyRippleWallet'
 import Landing from './pages/Landing/Landing';
 import NotFound from './pages/NotFound/NotFound'
-import { useDispatch } from 'react-redux';
-import { setAccountDatails } from './app/swift/swiftSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setAccountDatails, getAccountInfo } from './app/swift/swiftSlice';
 import { Header } from './components/Navigation/header.component';
 
 
 function App() {
   const dispatch = useDispatch()
+  const swiftAccount = useSelector(state => state.swift.swiftAccount)
 
   useEffect(() => {
     dispatch(setAccountDatails())
   }, [])
+
+  useEffect(() => {
+    if (swiftAccount?.account_ID) {
+      dispatch(getAccountInfo({ urlParams: `/${swiftAccount?.account_ID}`})).then(res => console.log(res))
+    }
+  }, [swiftAccount?.account_ID])
 
   return (
     <Router>

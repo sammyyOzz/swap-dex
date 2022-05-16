@@ -3,10 +3,13 @@ import './header.styles.css'
 // import balloxLogo from '../../assets/icons/balloxLogo.png'
 // import { Button } from '../button/button.component'
 import { Link, useLocation } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 // import { Sidebar } from './sidebar.component'
 
 export function Header() {
     const { pathname } = useLocation()
+    const swiftAccount = useSelector(state => state.swift.swiftAccount)
+    console.log(swiftAccount?.account_ID)
 
     return (
         <div className="header">
@@ -23,13 +26,13 @@ export function Header() {
                 </Link>
             </div> */}
 
-            <div className="header__right">
-                {/* <Button clear>Login</Button> */}
-                
-                {/* <a href="https://ballox-by-team-wonder.github.io/Ballox-Web/" target="_blank">
-                    <Button>Sign out</Button>
-                </a> */}
-            </div>
+            { swiftAccount?.account_ID && (
+                <Link to="/exchange">
+                    <div className="header__right">
+                        Dashboard
+                    </div>
+                </Link>
+            )}
         </div>
     )
 }

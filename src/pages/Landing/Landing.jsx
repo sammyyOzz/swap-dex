@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import WalletCard from '../../components/WalletCard/WalletCard'
 import * as Styles from './landing'
@@ -11,20 +11,22 @@ function Landing() {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const { handleSubmit } = useSubmit()
+    const [error, setError] = useState('')
+    
 
     const handleCreateWallet = () => {
         if (localStorage.getItem('swift_dex')) {
-            return
+            setError('You already have an account')
         } else {
             
             handleSubmit(
                 createAccount(),
                 (data) => {
-                    localStorage.setItem('swift_dex', JSON.stringify(data));
                     saveAccountDetails(data)
                     navigate('/wallet/create')
                 },
                 err => {
+                    setError('Something went wrong')
                     console.log(err)
                 }
             )
@@ -43,6 +45,7 @@ function Landing() {
                 <Styles.Title>SWIFT DEX</Styles.Title>
                 <Styles.Subtitle>Create a new wallet or import an existing one</Styles.Subtitle>
 
+                <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>
                 <WalletCard
                     title="create wallet"
                     text="a new wallet will be created for you"

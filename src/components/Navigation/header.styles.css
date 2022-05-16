@@ -36,6 +36,7 @@
 
 .header__right {
     margin-right: 20px;
+    color: black;
 }
 
 @media(max-width: 900px) {
@@ -43,7 +44,7 @@
         display: none;
     }
 
-    .header__right {
+    /* .header__right {
         display: none;
-    }
+    } */
 }

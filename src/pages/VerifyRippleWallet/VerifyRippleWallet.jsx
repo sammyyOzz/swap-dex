@@ -17,7 +17,7 @@ import { XRP } from '../../constants/network'
 import useFormControlRadio from '../../Hooks/FormControlRadio'
 import FormControlRadio from '../../components/FormControl/FormControlRadio'
 import useSubmit from '../../Hooks/Submit'
-import { importWithMnemonic, importWithPrivateKey, saveAccountDetails } from '../../app/swift/swiftSlice'
+import { importWithMnemonic, importWithPrivateKey, saveAccountDetails, setAccountDatails } from '../../app/swift/swiftSlice'
 
 
 function VerifyRippleWallet() {
@@ -30,9 +30,12 @@ function VerifyRippleWallet() {
     const [buttonIsEnabled, setButtonIsEnabled] = useState(false)
     const [openModal, setOpenModal] = useState(false)
     const { checkbox, modalContentStatus, toggleCheckbox, handleModalStatus } = useDisclaimer()
+    const [acctID, setAcctID] = useState('')
+    const [error, setError] = useState('')
 
     const { value: radioValue, handleClick: handleClickRadio } = useFormControlRadio('Mnemonic')
 
+    const account_ID = useSelector(state => state.swift.swiftAccount?.account_ID)
     const mnemonic = useSelector(state => state.swift.swiftAccount?.mnemonic)
     const privateKey = useSelector(state => state.swift.swiftAccount?.privateKey)
 
@@ -105,27 +108,35 @@ function VerifyRippleWallet() {
         navigate('/dashboard')
     }
 
+
+    const swiftAccount = useSelector(state => state.swift.swiftAccount)
     
 
     const { handleSubmit } = useSubmit()
 
     const handleSubmitForm = () => {
         if (option === 'create') {
+            localStorage.setItem('swift_dex', JSON.stringify(swiftAccount))
             navigate('/exchange')
+            
         } else {
-            const accountID = JSON.parse(localStorage.getItem('swift_dex'))?.id
             const data = radioValue === 'Mnemonic'
-                ? { id: accountID, mnemonic: xrpSeed }
-                : { id: accountID, key: xrpSeed }
+                ? { id: acctID, mnemonic: xrpSeed }
+                : { id: acctID, key: xrpSeed }
 
             const importType = radioValue === 'Mnemonic' ? importWithMnemonic : importWithPrivateKey
-
+            
             handleSubmit(
                 importType(data),
-                () => {
+                (res) => {
+                    console.log(res)
                     localStorage.setItem('swift_dex', JSON.stringify(data));
                     saveAccountDetails(data)
                     navigate('/exchange')
+                },
+                (err) => {
+                    console.log(err)
+                    setError('something went wrong')
                 }
             )
 
@@ -143,24 +154,33 @@ function VerifyRippleWallet() {
                 <Styles.Container>
                     {
                         option === 'import' && (
-                            <FormControlRadio
-                                label="Import with"  
-                                options={['Mnemonic', 'Private key']}
-                                value={radioValue}
-                                handleClick={handleClickRadio}
-                            />
+                            <>
+                                <p style={{ color: 'red' }}>{error}</p>
+                                <FormControlRadio
+                                    label="Import with"  
+                                    options={['Mnemonic', 'Private key']}
+                                    value={radioValue}
+                                    handleClick={handleClickRadio}
+                                />
+                            </>
                         )
                     }
                     <Styles.XrpWordsBox>
                         { option === 'create' 
                             ? <>
+                                <p><b>Account ID:</b></p>
+                                <p>{account_ID}</p>
+
                                 <p><b>Private key:</b></p>
                                 <p>{privateKey}</p>
 
                                 <p><b>Mnemonic:</b></p>
                                 <p>{mnemonic}</p>
                             </>
-                            : <textarea value={xrpSeed} onChange={e => setXrpSeed(e.target.value)} />
+                            : <>
+                                <textarea value={acctID} onChange={e => setAcctID(e.target.value)} placeholder="Account id" />
+                                <textarea value={xrpSeed} onChange={e => setXrpSeed(e.target.value)} placeholder="Mnemonic or private key" />
+                            </>
                         }
                     </Styles.XrpWordsBox>
                     

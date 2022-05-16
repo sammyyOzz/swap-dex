@@ -21,7 +21,7 @@ export const getHbarAmount = asyncRequest(`${namespace}/getHbarAmount`, '/gethba
 /**
  * !pass in correct id for endpoint below
  */
-export const getAccountInfo = asyncRequest(`${namespace}/getAccountInfo`, '/info/:id ', 'get')
+export const getAccountInfo = asyncRequest(`${namespace}/getAccountInfo`, '/info', 'get')
 
 const DEFAULT = { status: null, data: null, error: null }
 

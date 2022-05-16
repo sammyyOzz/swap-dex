@@ -77,6 +77,8 @@ function ExchangeAlgo() {
     const { modalState, handleModalOpen, handleModalClose } = useModal()
 
     const swiftAccount = useSelector(state => state.swift.swiftAccount)
+    const [swiftdexStatus, setSwiftdexStatus] = useState(null)
+    const [swiftdexError, setSwiftdexError] = useState(null)
 
     const resetValues = () => {
         setFromSelectedItem({ TokenId: 0, Pair: 'Hbar', amount: 0, unit: 'Algo' })
@@ -166,7 +168,12 @@ function ExchangeAlgo() {
                     }))
                     .unwrap()
                     .then(data => {
+                        setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        setSwiftdexStatus(HTTP_STATUS.REJECTED)
                     })
                 } else if (swapData.to_asset == 0) {
                     dispatch(tokenToHbar({
@@ -177,9 +184,11 @@ function ExchangeAlgo() {
                     }))
                     .unwrap()
                     .then(data => {
+                        setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
                     })
                     .catch(err => {
+                        setSwiftdexStatus(HTTP_STATUS.REJECTED)
                         console.log(err)
                     })
 
@@ -343,7 +352,10 @@ function ExchangeAlgo() {
                                 fullWidth 
                                 disabled={ !formIsValid || (getSwapValueStatus === HTTP_STATUS.PENDING) || (getSwapValueStatus === HTTP_STATUS.REJECTED) } 
                                 onClick={handleSwap}>
-                                    { tabValue === SWAP ? "swap" : "Add Liquidity" }
+                                    { tabValue === SWAP 
+                                        ? "swap" 
+                                        : (liquiditySubtabValue === ADD_LIQUIDITY ? 'Add liquidity' : liquiditySubtabValue === CREATE_PAIR ? 'Create Pair' : 'Remove liquidity') 
+                                    }
                             </Button>
                         </Styles.ButtonContainer>
                     </Styles.Root>
