@@ -18,6 +18,7 @@ import useFormControl from '../../Hooks/FormControl'
 import { useSearchAssetByIdCompare } from '../../Hooks/SearchAssetById'
 import useTabs from '../../Hooks/Tabs'
 import MyTabs from '../../components/MyTabs/MyTabs'
+import ClickAwayListener from 'react-click-away-listener'
 import { addLiquidity, createPair, getHbarAmount, getTokenAmount, hbarToToken, removeLiquidity, tokenToHbar } from '../../app/swift/swiftSlice'
 
 const SWAP = "Swap"
@@ -392,15 +393,19 @@ function ExchangeAlgo() {
 
                                 {/* <label className="asset-amount">From</label> */}
 
-                                <CustomSelectBox { ...fromSelectedItem } handleClick={toggleFromDropdownIsOpen} />
+                                <ClickAwayListener onClickAway={() => setFromDropdownIsOpen(false)}>
+                                    <div>
+                                        <CustomSelectBox { ...fromSelectedItem } handleClick={toggleFromDropdownIsOpen} />
 
-                                <CustomDropdownContainer 
-                                    dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : accountTokens} 
-                                    dropdownIsOpen={fromDropdownIsOpen}
-                                    setDropdownIsOpen={setFromDropdownIsOpen}
-                                    handleDropdownItemClick={setFromSelectedItem}
-                                    handleSetInputValue={handleSetFromInputValue}
-                                />
+                                        <CustomDropdownContainer 
+                                            dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : accountTokens} 
+                                            dropdownIsOpen={fromDropdownIsOpen}
+                                            setDropdownIsOpen={setFromDropdownIsOpen}
+                                            handleDropdownItemClick={setFromSelectedItem}
+                                            handleSetInputValue={handleSetFromInputValue}
+                                        />
+                                    </div>
+                                </ClickAwayListener>    
 
                                 <CustomSelectInput 
                                     placeholder="0.00" 
@@ -424,15 +429,19 @@ function ExchangeAlgo() {
                             <Styles.Container>
                                 <div className="innerContainer" style={{ padding: '20px 0' }}>
 
-                                    <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} /> 
+                                <ClickAwayListener onClickAway={() => setToDropdownIsOpen(false)}>
+                                    <div>
+                                        <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} /> 
 
-                                    <CustomDropdownContainer 
-                                        dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : accountTokens} 
-                                        dropdownIsOpen={toDropdownIsOpen}
-                                        setDropdownIsOpen={setToDropdownIsOpen}
-                                        handleDropdownItemClick={setToSelectedItem}
-                                        handleSetInputValue={handleSetToInputValue}
-                                    />
+                                        <CustomDropdownContainer 
+                                            dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : accountTokens} 
+                                            dropdownIsOpen={toDropdownIsOpen}
+                                            setDropdownIsOpen={setToDropdownIsOpen}
+                                            handleDropdownItemClick={setToSelectedItem}
+                                            handleSetInputValue={handleSetToInputValue}
+                                        />
+                                    </div>
+                                </ClickAwayListener>
 
                                     <CustomSelectInput 
                                         placeholder="0.00" 
