@@ -27,7 +27,8 @@ export const Bar = styled.div`
     font-weight: bold;
 
     @media(max-width: 800px) {
-        width: 5%;
+        width: 10px;
+        padding: 2px;
 
         & > p {
             display: none;
@@ -44,6 +45,6 @@ export const Body = styled.div`
     padding: 30px;
 
     @media(max-width: 800px) {
-        width: 90%;
+        width: calc(100% - 20px);
     }
 `
