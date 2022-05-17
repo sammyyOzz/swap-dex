@@ -4,6 +4,7 @@ import balloxLogo from '../../assets/icons/logo.jpg'
 // import { Button } from '../button/button.component'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { Button } from '../UI/Button/button'
 // import { Sidebar } from './sidebar.component'
 
 export function Header() {
@@ -28,7 +29,7 @@ export function Header() {
             { swiftAccount?.account_ID && (
                 <Link to="/exchange">
                     <div className="header__right">
-                        Dashboard
+                        <Button outlined>Dashboard</Button>
                     </div>
                 </Link>
             )}
