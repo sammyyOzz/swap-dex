@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import algorandLogo from '../assets/icons/algorandLogo.png'
+import hbar from '../assets/icons/hbar.jpg'
 import noAssetImage from '../assets/icons/noAssetImage.jpeg'
 
 function useCheckImageExists(asset) {
@@ -8,7 +9,7 @@ function useCheckImageExists(asset) {
 
     useEffect(() => {
         if ((asset?.id === 0) || !asset) {
-            setTinyManAssetImage(algorandLogo) 
+            setTinyManAssetImage(hbar) 
 
         } else {
             

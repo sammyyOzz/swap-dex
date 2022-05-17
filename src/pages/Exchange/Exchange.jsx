@@ -73,11 +73,15 @@ function ExchangeAlgo() {
     const { status: getSwapValueStatus, error: errorMessage } = useSelector(state => state.algorand.swapValue)
     // const swapValueError = errorMessage?.error
     const { data: holdingsData } = useSelector(state => state.swift.holdings)
+
+    const [resSuccess, setResSuccess] = useState(false)
+    const [resMessage, setResMessage] = useState('')
+
     const { modalState, handleModalOpen, handleModalClose } = useModal()
 
     const swiftAccount = useSelector(state => state.swift.swiftAccount)
     const [swiftdexStatus, setSwiftdexStatus] = useState(null)
-    const [swiftdexError, setSwiftdexError] = useState(null)
+    const [swiftdexError, setSwiftdexError] = useState('')
 
     const accountInfo = useSelector(state => state.swift.accountInfo.data)
     const accountTokens = accountInfo?.Tokens
@@ -86,10 +90,16 @@ function ExchangeAlgo() {
 
     const resetValues = () => {
         setFromSelectedItem({ TokenId: 0, Pair: 'Hbar', amount: 0, unit: 'Algo' })
-        setToSelectedItem("")
+        setToSelectedItem({ TokenId: 0, Pair: 'Hbar', amount: 0, unit: 'Algo' })
         handleSetFromInputValue("")
         handleSetToInputValue("")
     }
+
+    useEffect(() => {
+        if (liquiditySubtabValue === CREATE_PAIR) {
+            resetValues()
+        }
+    }, [liquiditySubtabValue])
 
     const swapResponseCallback = () => {
         resetValues()
@@ -97,65 +107,122 @@ function ExchangeAlgo() {
         dispatch(getActiveAlgorandWallet())
     }
 
+    // const [buttonIsEnabled, setButtonIsEnabled] = useState(false)
+
+    // useEffect(() => {
+    //     if (tabValue === SWAP && fromInputValue && toInputValue) {
+    //         setButtonIsEnabled(true)
+    //     } else if (tab)
+    // }, [liquiditySubtabValue, tabValue])
+
     const handleSwap = () => {
-        // const data = {
-        //     from_asset: fromSelectedItem.TokenId, 
-        //     to_asset: toSelectedItem.TokenId,
-        //     asset_amount: parseFloat(fromInputValue),
-        //     phrase: passphrase
-        // }
 
         if (tabValue === LIQUIDITY && liquiditySubtabValue === ADD_LIQUIDITY) {
-            dispatch(addLiquidity({ 
+            handleSubmit(addLiquidity({ 
                 tid: fromSelectedItem.TokenId || toSelectedItem.TokenId, 
                 tamount: fromSelectedItem.TokenId ? fromInputValue : toInputValue,
                 hamount: fromSelectedItem.TokenId ? toInputValue : fromInputValue, 
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
-            }))
+            }),
+            (res) => {
+                handleModalOpen()
+                setResMessage(res)
+                console.log(res);
+            },
+            (err) => {
+                handleModalOpen()
+                setResMessage(err)
+                console.log(err);
+            })
         } else if (tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR) {
-            dispatch(createPair({ 
+            handleSubmit(createPair({ 
                 tid: fromSelectedItem.TokenId || toSelectedItem.TokenId, 
                 tamount: fromSelectedItem.TokenId ? fromInputValue : toInputValue,
                 hamount: fromSelectedItem.TokenId ? toInputValue : fromInputValue,
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
-            }))
+            }),
+            (res) => {
+                handleModalOpen()
+                setResMessage(res)
+                console.log(res);
+            },
+            (err) => {
+                handleModalOpen()
+                setResMessage(err)
+                console.log(err);
+            })
         } else if (tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) {
-            dispatch(removeLiquidity({
+            handleSubmit(removeLiquidity({
                 tid: fromSelectedItem.TokenId, 
                 tamount: fromInputValue,
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
-            }))
-        } else if (tabValue === SWAP && fromSelectedItem.TokenId == 0) {
-            dispatch(hbarToToken({ 
+            }),
+            (res) => {
+                handleModalOpen()
+                setResMessage(res)
+                console.log(res);
+            },
+            (err) => {
+                handleModalOpen()
+                setResMessage(err)
+                console.log(err);
+            })
+        } else if (tabValue === SWAP && fromSelectedItem.TokenId == 0 && toSelectedItem.TokenId != 0) {
+            handleSubmit(hbarToToken({ 
                 tid: toSelectedItem.TokenId,
                 hamount: fromInputValue,
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
-            }))
-        } else if (tabValue === SWAP && fromSelectedItem.TokenId != 0) {
-            dispatch(tokenToHbar({
+            }),
+            (res) => {
+                handleModalOpen()
+                setResMessage(res)
+                console.log(res);
+            },
+            (err) => {
+                handleModalOpen()
+                setResMessage(err)
+                console.log(err);
+            })
+        } else if (tabValue === SWAP && fromSelectedItem.TokenId != 0 && toSelectedItem.TokenId == 0) {
+            handleSubmit(tokenToHbar({
                 tid: fromSelectedItem.TokenId,
                 tamount: fromInputValue,
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
-            }))
+            }),
+            (res) => {
+                handleModalOpen()
+                setResMessage(res)
+                console.log(res);
+            },
+            (err) => {
+                handleModalOpen()
+                setResMessage(err)
+                console.log(err);
+            })
         } else if (tabValue === SWAP && fromSelectedItem.TokenId != 0 && toSelectedItem.TokenId != 0) {
-            dispatch(tokenToHbar({
+            handleSubmit(tokenToHbar({
                 fromid: fromSelectedItem.TokenId,
                 toid: toSelectedItem.TokenId,
                 tamount: fromInputValue,
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
-            }))
+            }),
+            (res) => {
+                handleModalOpen()
+                setResMessage(res)
+                console.log(res);
+            },
+            (err) => {
+                handleModalOpen()
+                setResMessage(err)
+                console.log(err);
+            })
         }
-             
-
-        // const dispatchAlgoAction = tabValue === SWAP ? swapAlgorand : algorandLiquidity
-        
-        // handleSubmit(dispatchAlgoAction(data), swapResponseCallback, swapResponseCallback)
     }
     const selectSwap = state => state.algorand.swap
     const selectLiquidity = state => state.algorand.liquidity
@@ -167,42 +234,13 @@ function ExchangeAlgo() {
     const success = status === HTTP_STATUS.FULFILLED
 
 
-    // useEffect(() => {
-    //     return () => dispatch(resetSwapValueData())
-    // }, [])
-
-
-    /**
-     * send check request on to asset ID input change
-     */
-    // const { status: toAssetIsValidStatus, data: toAssetIsValidData } = useSearchAssetByIdCompare(toInputValue, { asset_id: toInputValue }, checkAlgorandAssetIsValid, 'includes')
-    
-    // const [searchedAssets, setSearchedAssets] = useState([])
-
-
-    // useEffect(() => {
-    //     if (toAssetIsValidData) {
-    //         if (!holdingsData.includes(toAssetIsValidData) && !searchedAssets.includes(toAssetIsValidData)) {
-    //             setSearchedAssets(prevState => [...prevState, toAssetIsValidData])
-    //         }
-    //     }
-    // }, [toAssetIsValidData])
-
-    const swapData = {
-        from_asset: fromSelectedItem.TokenId === swapIds.from ? fromSelectedItem.TokenId : toSelectedItem.TokenId, 
-        to_asset: fromSelectedItem.TokenId !== swapIds.from ? fromSelectedItem.TokenId : toSelectedItem.TokenId,
-        asset_amount: fromSelectedItem.TokenId === swapIds.from ? parseFloat(fromInputValue) : parseFloat(toInputValue),
-        phrase: passphrase
-    }
-    // console.log(swapData)
-
     /**
      * get equivelent value of other asset to swap to/from and set the value 
      */
-     useEffect(() => {
+    useEffect(() => {
         const inputRateTimer = setTimeout(() => {
 
-            if ((swapData.asset_amount > 0) && (fromSelectedItem.TokenId !== toSelectedItem.TokenId)) {
+            if (fromInputValue > 0) {
                 if (
                     ((tabValue === LIQUIDITY) && (liquiditySubtabValue === CREATE_PAIR)) ||
                     ((tabValue === LIQUIDITY) && (liquiditySubtabValue === REMOVE_LIQUIDITY))
@@ -210,12 +248,11 @@ function ExchangeAlgo() {
                     return
                 }
 
-
-                if (swapData.from_asset == 0) {
+                if (fromSelectedItem.TokenId == 0) {
                     setSwiftdexStatus(HTTP_STATUS.PENDING)
                     dispatch(getTokenAmount({
-                        tid: swapData.to_asset,
-                        hamount: swapData.asset_amount,
+                        tid: toSelectedItem.TokenId,
+                        hamount: fromInputValue,
                         acctid: swiftAccount?.account_ID,
                         acctkey: swiftAccount?.privateKey
                     }))
@@ -224,18 +261,18 @@ function ExchangeAlgo() {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
                         handleSetToInputValue(data["Token Amount"])
-                        
+                        if (typeof(data) !== 'object') setSwiftdexError(data)
                     })
                     .catch(err => {
                         console.log(err)
                         setSwiftdexError(err)
                         setSwiftdexStatus(HTTP_STATUS.REJECTED)
                     })
-                } else if (swapData.to_asset == 0) {
+                } else if ((fromSelectedItem.TokenId != 0) && (toSelectedItem.TokenId == 0)) {
                     setSwiftdexStatus(HTTP_STATUS.PENDING)
                     dispatch(getHbarAmount({
-                        tid: swapData.from_asset,
-                        tamount: swapData.asset_amount,
+                        tid: fromSelectedItem.TokenId,
+                        tamount: fromInputValue,
                         acctid: swiftAccount?.account_ID,
                         acctkey: swiftAccount?.privateKey
                     }))
@@ -243,7 +280,8 @@ function ExchangeAlgo() {
                     .then(data => {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
-                        handleSetFromInputValue(data["Hbar Amount"])
+                        handleSetToInputValue(data["Hbar Amount"])
+                        if (typeof(data) !== 'object') setSwiftdexError(data)
                     })
                     .catch(err => {
                         setSwiftdexStatus(HTTP_STATUS.REJECTED)
@@ -251,11 +289,11 @@ function ExchangeAlgo() {
                         setSwiftdexError(err)
                     })
 
-                } else if ((swapData.from_asset != 0) && (swapData.to_asset != 0)) {
+                } else if ((fromSelectedItem.TokenId != 0) && (toSelectedItem.TokenId != 0)) {
                     setSwiftdexStatus(HTTP_STATUS.PENDING)
                     dispatch(getHbarAmount({
-                        tid: swapData.from_asset,
-                        tamount: swapData.asset_amount,
+                        tid: fromSelectedItem.TokenId,
+                        tamount: fromInputValue,
                         acctid: swiftAccount?.account_ID,
                         acctkey: swiftAccount?.privateKey
                     }))
@@ -263,7 +301,7 @@ function ExchangeAlgo() {
                     .then(data => {
                         console.log(data)
                         dispatch(getTokenAmount({
-                            tid: swapData.to_asset,
+                            tid: toSelectedItem.TokenId,
                             hamount: data['Hbar Amount'],
                             acctid: swiftAccount?.account_ID,
                             acctkey: swiftAccount?.privateKey
@@ -273,6 +311,7 @@ function ExchangeAlgo() {
                             setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                             console.log('final result', data)
                             handleSetToInputValue(data["Token Amount"])
+                            if (typeof(data) !== 'object') setSwiftdexError(data)
                         })
                     })
                     .catch(err => {
@@ -283,21 +322,11 @@ function ExchangeAlgo() {
                     //then result to token
                 }
 
-                // dispatch(getAlgorandSwapValue(swapData))
-                // .unwrap()
-                // .then(swapAmount => {
-                //     if (fromSelectedItem.TokenId === swapIds.from) {
-                //         handleSetToInputValue(swapAmount)
-                //     } else {
-                //         handleSetFromInputValue(swapAmount)
-                //     }
-                // })
-                // .catch(err => console.log(err))
             }
         }, 1000)
 
         return () => clearTimeout(inputRateTimer)
-    }, [swapData.asset_amount, fromSelectedItem.TokenId, toSelectedItem.TokenId])
+    }, [fromSelectedItem.TokenId, fromInputValue])
 
     useEffect(() => {
         if (tabValue === SWAP) handleSetToInputValue("")
@@ -377,7 +406,7 @@ function ExchangeAlgo() {
                                     placeholder="0.00" 
                                     value={fromInputValue}
                                     onChange={handleFromInputChange}
-                                    onFocus={handleFromInputFocus}
+                                    // onFocus={handleFromInputFocus}
                                 />
 
                                 <Styles.Info>
@@ -409,12 +438,12 @@ function ExchangeAlgo() {
                                         placeholder="0.00" 
                                         value={toInputValue}
                                         onChange={handleToInputChange}
-                                        onFocus={handleToInputFocus}
+                                        // onFocus={handleToInputFocus}
                                     />
 
                                     {/* { toSelectedItem && <Styles.PasteID onClick={resetToSelectedValues}>Paste Asset ID</Styles.PasteID> } */}
 
-                                    { toSelectedItem && <p>{swiftdexError ? (swiftdexError || 'Could not get equivelent value') : ''}</p> }
+                                    <p>{swiftdexError}</p>
 
                                     { swiftdexStatus === HTTP_STATUS.PENDING && (
                                         <Styles.LoaderContainer2><ThreeDots height="80" width="80" color='gray' /></Styles.LoaderContainer2>
@@ -443,13 +472,10 @@ function ExchangeAlgo() {
             {/* response modal */}
             <Modal open={modalState} handleClose={handleModalClose}>
                 <ModalResponse
-                    success={success}
-                    title={success ? 'success' : 'error'}
-                    description={
-                        success 
-                        ? (tabValue === SWAP ? 'successfully swapped asset' : 'successfully added liquidity') 
-                        : (error || 'something went wrong!')
-                    }
+                    hideImageAndTitle
+                    success={resSuccess}
+                    title={resSuccess ? 'success' : 'error'}
+                    description={resMessage}
                 />
             </Modal>
         </>

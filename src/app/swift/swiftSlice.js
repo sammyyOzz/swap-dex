@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { HTTP_STATUS } from '../../constants/httpStatus'
 import { asyncRequest } from '../services'
 import algorandLogo from '../../assets/icons/algorandLogo.png'
+import hbar from '../../assets/icons/hbar.jpg'
 
 
 const namespace = 'swift'
@@ -30,7 +31,7 @@ const swiftSlice = createSlice({
     name: 'swift',
     initialState: {
       swiftAccount: null,
-      holdings: { ...DEFAULT, data: [{ TokenId: 0, Pair: 'Hbar', name: 'Algorand', unit: 'Algo', image: algorandLogo }] },
+      holdings: { ...DEFAULT, data: [{ TokenId: 0, Pair: 'Hbar', name: 'Algorand', unit: 'Algo', image: hbar }] },
       accountInfo: DEFAULT
     },
     reducers: {

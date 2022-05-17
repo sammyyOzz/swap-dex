@@ -8,14 +8,14 @@ import { Grid } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { ThreeDots } from 'react-loader-spinner'
 import { getLiquidityPool } from '../../app/swift/swiftSlice';
-
+import hbar from '../../assets/icons/hbar.jpg'
+import noAssetImage from '../../assets/icons/noAssetImage.jpeg'
 
 export function CustomSelectBox({ TokenId, Pair, unit, handleClick, isDropdownItem }) {
-    const { tinyManAssetImage } = useCheckImageExists({ id: TokenId })
 
     return (
         <Styles.SelectionBox dropdownItem={isDropdownItem} onClick={handleClick}>
-            <Styles.Logo src={tinyManAssetImage} alt="" />
+            <Styles.Logo src={TokenId == 0 ? hbar : noAssetImage} alt="" />
             <Styles.NameBox>
                 <div className="title">{Pair?.split('/')[0]}</div>
                 <div className="subtitle">{`$${Pair?.split('/')[0]}`}</div>
@@ -101,7 +101,7 @@ const selectBoxStyle = {
 }
 
 export function SelectBox({ id, name, amount, unit, handleClick, hideArrowIcon, label, ...inputBoxProps }) {
-    const { tinyManAssetImage } = useCheckImageExists({ id })
+    // const { tinyManAssetImage } = useCheckImageExists({ id })
 
     return (
         <>
@@ -110,7 +110,7 @@ export function SelectBox({ id, name, amount, unit, handleClick, hideArrowIcon, 
             <Grid item xs={12} sx={selectBoxStyle}>
                 <Styles.SelectBoxLeft onClick={handleClick}>
                     <div className="left">
-                        <img src={tinyManAssetImage} alt="" />
+                        <img src={""} alt="" />
                         <span>{unit}</span>
                     </div>
 
