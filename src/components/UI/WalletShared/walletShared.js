@@ -181,3 +181,10 @@ export const NumberedInput = styled.div`
     }
 
 `
+
+export const Title = styled.h2`
+    font-size: 25px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    text-align: center;
+`

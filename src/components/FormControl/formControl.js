@@ -67,7 +67,7 @@ export const CustomInput = styled.input`
     }
 
     ::placeholder {
-        color: #bdbdbd;
+        color: gray;
     }
 
     &:focus {
@@ -111,6 +111,7 @@ export const SingleRadioBox = styled.div`
     display: flex;
     align-items: center;
     border: 2px solid #043923;
+    border-radius: 10px;
     cursor: pointer;
 `
 

@@ -5,9 +5,9 @@ export const Root = styled.div`
     margin: 30px auto;
     box-shadow: 0px 8px 8px rgba(14, 181, 111, 0.06);
     background-color: white;
-    padding: 20px 0 150px 0;
+    /* padding: 20px 0 150px 0; */
     border-radius: 20px;
-    border: 1px solid green;
+    /* border: 1px solid green; */
 
     /* @media(max-width: 1200px) {
         margin-top: 150px;

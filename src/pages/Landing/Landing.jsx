@@ -6,6 +6,8 @@ import * as Styles from './landing'
 import { useDispatch } from 'react-redux'
 import { createAccount, saveAccountDetails } from '../../app/swift/swiftSlice'
 import useSubmit from '../../Hooks/Submit'
+import Layout from '../../components/Layout/Layout'
+
 
 function Landing() {
     const navigate = useNavigate()
@@ -39,10 +41,8 @@ function Landing() {
     // }
 
     return (
-        <Grid container>
-            <Grid item xs={1} md={4} />
-            <Grid item xs={10} md={4}>
-                <Styles.Title>SWIFT DEX</Styles.Title>
+        <Layout leftText="GETTING STARTED WITH SWIFT DEX" rightText="ONLY A FEW CLICKS AWAY">
+            <Styles.Title>SWIFT DEX</Styles.Title>
                 <Styles.Subtitle>Create a new wallet or import an existing one</Styles.Subtitle>
 
                 <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>
@@ -58,10 +58,7 @@ function Landing() {
                         // handleClick={handleImportWallet}
                     />
                 </Link>
-
-            </Grid>
-            <Grid item xs={1} md={4} />
-        </Grid>
+        </Layout>
     )
 }
 

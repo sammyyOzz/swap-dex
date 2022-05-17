@@ -18,6 +18,10 @@ import useFormControlRadio from '../../Hooks/FormControlRadio'
 import FormControlRadio from '../../components/FormControl/FormControlRadio'
 import useSubmit from '../../Hooks/Submit'
 import { importWithMnemonic, importWithPrivateKey, saveAccountDetails, setAccountDatails } from '../../app/swift/swiftSlice'
+import Layout from '../../components/Layout/Layout'
+import FormControl from '../../components/FormControl/FormControl'
+import useFormControl from '../../Hooks/FormControl'
+import CopyButtonWithTooltip from '../../components/UI/MyTooltip/MyTooltip'
 
 
 function VerifyRippleWallet() {
@@ -32,6 +36,9 @@ function VerifyRippleWallet() {
     const { checkbox, modalContentStatus, toggleCheckbox, handleModalStatus } = useDisclaimer()
     const [acctID, setAcctID] = useState('')
     const [error, setError] = useState('')
+
+    const { value: accountIDValue, handleChange: handleAccountIDChange } = useFormControl()
+    const { value: keyValue, handleChange: handleKeyChange } = useFormControl()
 
     const { value: radioValue, handleClick: handleClickRadio } = useFormControlRadio('Mnemonic')
 
@@ -81,24 +88,24 @@ function VerifyRippleWallet() {
             handleOpenModal()
             return
         }
-    
+
         dispatch(showBackdrop())
         dispatch(confirmAlgorandPassphrase({ id: walletId, status: CONFIRMED }))
-        .unwrap()
-        .then(res => {
-            dispatch(hideBackdrop())
-            //open modal with success message
-            handleModalStatus(SUCCESS)
-            handleOpenModal()
-            console.log(res)
-        })
-        .catch(err => {
-            dispatch(hideBackdrop())
-            //open modal with error message
-            handleModalStatus(ERROR)
-            handleOpenModal()
-            console.log(err)
-        })
+            .unwrap()
+            .then(res => {
+                dispatch(hideBackdrop())
+                //open modal with success message
+                handleModalStatus(SUCCESS)
+                handleOpenModal()
+                console.log(res)
+            })
+            .catch(err => {
+                dispatch(hideBackdrop())
+                //open modal with error message
+                handleModalStatus(ERROR)
+                handleOpenModal()
+                console.log(err)
+            })
 
     }
 
@@ -117,7 +124,7 @@ function VerifyRippleWallet() {
 
 
     const swiftAccount = useSelector(state => state.swift.swiftAccount)
-    
+
 
     const { handleSubmit } = useSubmit()
 
@@ -125,14 +132,14 @@ function VerifyRippleWallet() {
         if (option === 'create') {
             localStorage.setItem('swift_dex', JSON.stringify({ account_ID, privateKey, mnemonic }))
             navigate('/exchange')
-            
+
         } else {
             const data = radioValue === 'Mnemonic'
                 ? { id: acctID, mnemonic: xrpSeed }
                 : { id: acctID, key: xrpSeed }
 
             const importType = radioValue === 'Mnemonic' ? importWithMnemonic : importWithPrivateKey
-            
+
             handleSubmit(
                 importType(data),
                 (res) => {
@@ -149,91 +156,106 @@ function VerifyRippleWallet() {
 
         }
     }
-    
+
 
     return (
-        // <AuthWrapper>
-            <WalletWrapper
-                title={option === 'create' ? 'CREATE NEW WALLET' : 'IMPORT WALLET'}
-                description="Ensure you copy and backup the private key shown below."
-                link={`/create-wallet/${XRP}`}
+        <>
+            <Layout
+                leftText="IMPORT OR CREATE YOUR WALLET"
+                rightText="IMPORT OR CREATE YOUR WALLET"
             >
-                <Styles.Container>
-                    {
-                        option === 'import' && (
-                            <>
-                                <p style={{ color: 'red' }}>{error}</p>
-                                <FormControlRadio
-                                    label="Import with"  
-                                    options={['Mnemonic', 'Private key']}
-                                    value={radioValue}
-                                    handleClick={handleClickRadio}
-                                />
-                            </>
-                        )
+                {
+                    option === 'import' && (
+                        <>
+                            <p style={{ color: 'red' }}>{error}</p>
+                            <Styles.Title>Import your wallet</Styles.Title>
+                            <FormControlRadio
+                                label="Import with"
+                                options={['Mnemonic', 'Private key']}
+                                value={radioValue}
+                                handleClick={handleClickRadio}
+                            />
+                        </>
+                    )
+                }
+                <Styles.XrpWordsBox>
+                    {option === 'create'
+                        ? <>
+                            <Styles.Title>Create your wallet</Styles.Title>
+                            <p><b>Account ID:</b></p>
+                            <p>{account_ID}</p>
+
+                            <p><b>Private key:</b></p>
+                            <p>{privateKey}</p>
+
+                            <p><b>Mnemonic:</b></p>
+                            <p>{mnemonic}</p>
+
+                            <CopyButtonWithTooltip 
+                                textToCopy={`Account ID: ${account_ID} \n Private Key: ${privateKey} \n Mnemonic: ${mnemonic}`} 
+                                onlyIcon
+                            />
+                        </>
+                        : <>
+                            <FormControl 
+                                placeholder="Account ID"
+                                value={acctID}
+                                handleChange={e => setAcctID(e.target.value)}
+                            />
+
+                            <FormControl
+                                textArea
+                                placeholder="Mnemonic or Private Key"
+                                value={xrpSeed}
+                                handleChange={e => setXrpSeed(e.target.value)}
+                            />
+                            {/* <textarea value={acctID} onChange={e => setAcctID(e.target.value)} placeholder="Account id" />
+                            <textarea value={xrpSeed} onChange={e => setXrpSeed(e.target.value)} placeholder="Mnemonic or private key" /> */}
+                        </>
                     }
-                    <Styles.XrpWordsBox>
-                        { option === 'create' 
-                            ? <>
-                                <p><b>Account ID:</b></p>
-                                <p>{account_ID}</p>
+                </Styles.XrpWordsBox>
 
-                                <p><b>Private key:</b></p>
-                                <p>{privateKey}</p>
-
-                                <p><b>Mnemonic:</b></p>
-                                <p>{mnemonic}</p>
-                            </>
-                            : <>
-                                <textarea value={acctID} onChange={e => setAcctID(e.target.value)} placeholder="Account id" />
-                                <textarea value={xrpSeed} onChange={e => setXrpSeed(e.target.value)} placeholder="Mnemonic or private key" />
-                            </>
-                        }
-                    </Styles.XrpWordsBox>
-                    
-                    <Styles.ButtonsContainer>
-                        {/* <CopyButton outlined onClick={handlePasteSeed}>
+                <Styles.ButtonsContainer>
+                    {/* <CopyButton outlined onClick={handlePasteSeed}>
                             paste <NoteOutlinedIcon fontSize="small" sx={{ ml: '7px', transform: 'rotate(90deg)' }} />
                         </CopyButton>  */}
-                        
-                        <Button 
-                            fullWidth 
-                            // disabled={!buttonIsEnabled} 
-                            // onClick={showDisclaimerModal}
-                            onClick={handleSubmitForm}
-                        >   
-                            { option === 'create' ? 'proceed' : 'import' }
-                        </Button>
-                    </Styles.ButtonsContainer>
 
-                </Styles.Container>
+                    <Button
+                        fullWidth
+                        // disabled={!buttonIsEnabled} 
+                        // onClick={showDisclaimerModal}
+                        onClick={handleSubmitForm}
+                    >
+                        {option === 'create' ? 'proceed' : 'import'}
+                    </Button>
+                </Styles.ButtonsContainer>
 
                 <Modal open={openModal} handleClose={handleCloseModal}>
                     <Styles.ModalContent>
-                    {
-                        modalContentStatus === DEFAULT &&
-                        <DisclaimerDefault
-                            checkbox={checkbox}
-                            toggleCheckbox={toggleCheckbox}
-                            handleContinue={handleVerifyPassphrase}
-                            handleCloseModal={handleCloseModal}
-                        />
-                    }
-                    {
-                        modalContentStatus === SUCCESS &&
-                        <DisclaimerSuccess 
-                            create
-                            handleClick={navigateToDashboard} 
-                        />
-                    }
-                    {
-                        modalContentStatus === ERROR &&
-                        <DisclaimerError />
-                    }
+                        {
+                            modalContentStatus === DEFAULT &&
+                            <DisclaimerDefault
+                                checkbox={checkbox}
+                                toggleCheckbox={toggleCheckbox}
+                                handleContinue={handleVerifyPassphrase}
+                                handleCloseModal={handleCloseModal}
+                            />
+                        }
+                        {
+                            modalContentStatus === SUCCESS &&
+                            <DisclaimerSuccess
+                                create
+                                handleClick={navigateToDashboard}
+                            />
+                        }
+                        {
+                            modalContentStatus === ERROR &&
+                            <DisclaimerError />
+                        }
                     </Styles.ModalContent>
                 </Modal>
-            </WalletWrapper>
-        // </AuthWrapper>
+            </Layout>
+        </>
     )
 }
 

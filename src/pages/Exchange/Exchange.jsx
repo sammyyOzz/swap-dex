@@ -20,6 +20,7 @@ import useTabs from '../../Hooks/Tabs'
 import MyTabs from '../../components/MyTabs/MyTabs'
 import ClickAwayListener from 'react-click-away-listener'
 import { addLiquidity, createPair, getHbarAmount, getTokenAmount, hbarToToken, removeLiquidity, tokenToHbar } from '../../app/swift/swiftSlice'
+import Layout from '../../components/Layout/Layout'
 
 const SWAP = "Swap"
 const LIQUIDITY = "Liquidity"
@@ -361,122 +362,118 @@ function ExchangeAlgo() {
 
     return (
         <>
-            <Grid container columns={18}>
-                <Grid item xs={2} md={5} />
-                <Grid item xs={14} md={8}>
-                    <Styles.Root>
-                        {/* <Styles.Title>Swap</Styles.Title> */}
-                        <div style={{ margin: '0 0 30px 20px'  }}>
-                            <MyTabs
-                                tabs={tabs}
-                                tabValue={tabValue}
-                                handleTabChange={handleTabChange}
-                                center
-                            />
-                        </div>
-                        <Styles.Text>
-                            { tabValue === SWAP 
-                                ? "Token should be added to your wallet before swapping." 
-                                : (
-                                    <MyTabs
-                                        tabs={liquiditySubtabs}
-                                        tabValue={liquiditySubtabValue}
-                                        handleTabChange={handleLiquiditySubTabChange}
-                                        center
+            <Layout>
+                <Styles.Root>
+                    {/* <Styles.Title>Swap</Styles.Title> */}
+                    <div style={{ margin: '0 0 30px 20px'  }}>
+                        <MyTabs
+                            tabs={tabs}
+                            tabValue={tabValue}
+                            handleTabChange={handleTabChange}
+                            center
+                        />
+                    </div>
+                    <Styles.Text>
+                        { tabValue === SWAP 
+                            ? "Token should be added to your wallet before swapping." 
+                            : (
+                                <MyTabs
+                                    tabs={liquiditySubtabs}
+                                    tabValue={liquiditySubtabValue}
+                                    handleTabChange={handleLiquiditySubTabChange}
+                                    center
+                                />
+                            )
+                        }
+                    </Styles.Text>
+                    <Styles.Line />
+                    <Styles.Container>
+                        <div className="innerContainer">
+
+                            {/* <label className="asset-amount">From</label> */}
+
+                            <ClickAwayListener onClickAway={() => setFromDropdownIsOpen(false)}>
+                                <div>
+                                    <CustomSelectBox { ...fromSelectedItem } handleClick={toggleFromDropdownIsOpen} />
+
+                                    <CustomDropdownContainer 
+                                        dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : (accountTokens || [])} 
+                                        dropdownIsOpen={fromDropdownIsOpen}
+                                        setDropdownIsOpen={setFromDropdownIsOpen}
+                                        handleDropdownItemClick={setFromSelectedItem}
+                                        handleSetInputValue={handleSetFromInputValue}
                                     />
-                                )
-                            }
-                        </Styles.Text>
-                        <Styles.Line />
+                                </div>
+                            </ClickAwayListener>    
+
+                            <CustomSelectInput 
+                                placeholder="0.00" 
+                                value={fromInputValue}
+                                onChange={handleFromInputChange}
+                                // onFocus={handleFromInputFocus}
+                            />
+
+                            <Styles.Info>
+                                {/* Balance:&nbsp; 
+                                { fromSelectedItem.id === 0 ? 
+                                    <strong>{activeWalletData?.balance}</strong> : 
+                                    <strong>{holdingsData?.filter(asset => asset.id === fromSelectedItem.id)[0]?.amount}</strong> 
+                                } */}
+                            </Styles.Info>
+                        </div>
+                        { !(tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) && <img src={exchangeLogo} alt="" />}
+                    </Styles.Container>
+
+                    { !(tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) && (
                         <Styles.Container>
-                            <div className="innerContainer">
+                            <div className="innerContainer" style={{ padding: '20px 0' }}>
 
-                                {/* <label className="asset-amount">From</label> */}
+                            <ClickAwayListener onClickAway={() => setToDropdownIsOpen(false)}>
+                                <div>
+                                    <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} /> 
 
-                                <ClickAwayListener onClickAway={() => setFromDropdownIsOpen(false)}>
-                                    <div>
-                                        <CustomSelectBox { ...fromSelectedItem } handleClick={toggleFromDropdownIsOpen} />
-
-                                        <CustomDropdownContainer 
-                                            dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : accountTokens} 
-                                            dropdownIsOpen={fromDropdownIsOpen}
-                                            setDropdownIsOpen={setFromDropdownIsOpen}
-                                            handleDropdownItemClick={setFromSelectedItem}
-                                            handleSetInputValue={handleSetFromInputValue}
-                                        />
-                                    </div>
-                                </ClickAwayListener>    
+                                    <CustomDropdownContainer 
+                                        dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : (accountTokens || [])} 
+                                        dropdownIsOpen={toDropdownIsOpen}
+                                        setDropdownIsOpen={setToDropdownIsOpen}
+                                        handleDropdownItemClick={setToSelectedItem}
+                                        handleSetInputValue={handleSetToInputValue}
+                                    />
+                                </div>
+                            </ClickAwayListener>
 
                                 <CustomSelectInput 
                                     placeholder="0.00" 
-                                    value={fromInputValue}
-                                    onChange={handleFromInputChange}
-                                    // onFocus={handleFromInputFocus}
+                                    value={toInputValue}
+                                    onChange={handleToInputChange}
+                                    // onFocus={handleToInputFocus}
                                 />
 
-                                <Styles.Info>
-                                    {/* Balance:&nbsp; 
-                                    { fromSelectedItem.id === 0 ? 
-                                        <strong>{activeWalletData?.balance}</strong> : 
-                                        <strong>{holdingsData?.filter(asset => asset.id === fromSelectedItem.id)[0]?.amount}</strong> 
-                                    } */}
-                                </Styles.Info>
-                            </div>
-                            { !(tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) && <img src={exchangeLogo} alt="" />}
-                        </Styles.Container>
+                                {/* { toSelectedItem && <Styles.PasteID onClick={resetToSelectedValues}>Paste Asset ID</Styles.PasteID> } */}
 
-                        { !(tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) && (
-                            <Styles.Container>
-                                <div className="innerContainer" style={{ padding: '20px 0' }}>
+                                <p>{swiftdexError}</p>
 
-                                <ClickAwayListener onClickAway={() => setToDropdownIsOpen(false)}>
-                                    <div>
-                                        <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} /> 
-
-                                        <CustomDropdownContainer 
-                                            dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : accountTokens} 
-                                            dropdownIsOpen={toDropdownIsOpen}
-                                            setDropdownIsOpen={setToDropdownIsOpen}
-                                            handleDropdownItemClick={setToSelectedItem}
-                                            handleSetInputValue={handleSetToInputValue}
-                                        />
-                                    </div>
-                                </ClickAwayListener>
-
-                                    <CustomSelectInput 
-                                        placeholder="0.00" 
-                                        value={toInputValue}
-                                        onChange={handleToInputChange}
-                                        // onFocus={handleToInputFocus}
-                                    />
-
-                                    {/* { toSelectedItem && <Styles.PasteID onClick={resetToSelectedValues}>Paste Asset ID</Styles.PasteID> } */}
-
-                                    <p>{swiftdexError}</p>
-
-                                    { swiftdexStatus === HTTP_STATUS.PENDING && (
-                                        <Styles.LoaderContainer2><ThreeDots height="80" width="80" color='gray' /></Styles.LoaderContainer2>
-                                    )}
-                                    
-                                </div>
+                                { swiftdexStatus === HTTP_STATUS.PENDING && (
+                                    <Styles.LoaderContainer2><ThreeDots height="80" width="80" color='gray' /></Styles.LoaderContainer2>
+                                )}
                                 
-                            </Styles.Container>
-                        )}
-                        <Styles.ButtonContainer>
-                            <Button 
-                                fullWidth 
-                                // disabled={ !formIsValid || (swiftdexStatus === HTTP_STATUS.PENDING) || (swiftdexStatus === HTTP_STATUS.REJECTED) } 
-                                onClick={handleSwap}>
-                                    { tabValue === SWAP 
-                                        ? "swap" 
-                                        : (liquiditySubtabValue === ADD_LIQUIDITY ? 'Add liquidity' : liquiditySubtabValue === CREATE_PAIR ? 'Create Pair' : 'Remove liquidity') 
-                                    }
-                            </Button>
-                        </Styles.ButtonContainer>
-                    </Styles.Root>
-                </Grid>
-                <Grid item xs={2} md={5} />
-            </Grid>
+                            </div>
+                            
+                        </Styles.Container>
+                    )}
+                    <Styles.ButtonContainer>
+                        <Button 
+                            fullWidth 
+                            // disabled={ !formIsValid || (swiftdexStatus === HTTP_STATUS.PENDING) || (swiftdexStatus === HTTP_STATUS.REJECTED) } 
+                            onClick={handleSwap}>
+                                { tabValue === SWAP 
+                                    ? "swap" 
+                                    : (liquiditySubtabValue === ADD_LIQUIDITY ? 'Add liquidity' : liquiditySubtabValue === CREATE_PAIR ? 'Create Pair' : 'Remove liquidity') 
+                                }
+                        </Button>
+                    </Styles.ButtonContainer>
+                </Styles.Root>
+            </Layout>
 
             {/* response modal */}
             <Modal open={modalState} handleClose={handleModalClose}>
