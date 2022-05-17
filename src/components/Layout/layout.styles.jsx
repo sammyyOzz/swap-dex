@@ -18,7 +18,7 @@ export const Overlay = styled.div`
 `
 
 export const Bar = styled.div`
-    width: 25%;
+    width: ${p => p.fullScreen ? '10px' : '25%'};
     height: 100%;
     box-sizing: border-box;
     padding: 25px;
@@ -37,7 +37,7 @@ export const Bar = styled.div`
 `
 
 export const Body = styled.div`
-    width: 50%;
+    width: ${p => p.fullScreen ? 'calc(100% - 20px)' : '50%'};
     background-color: white;
     margin: 30px auto;
     border-radius: 20px;

@@ -24,6 +24,20 @@ export function CustomSelectBox({ TokenId, Pair, unit, handleClick, isDropdownIt
     )
 }
 
+export function CreatePairSelectBox({ TokenId, TokenSymbol, TokenBalance, TokenName, handleClick }) {
+
+    return (
+        <Styles.SelectionBox dropdownItem={true} onClick={handleClick}>
+            <Styles.Logo src={TokenId == 0 ? hbar : noAssetImage} alt="" />
+            <Styles.NameBox>
+                <div className="title">{TokenSymbol}</div>
+                <div className="subtitle">{`$${TokenSymbol}---$${TokenBalance}`}</div>
+            </Styles.NameBox>
+        </Styles.SelectionBox>
+    )
+}
+
+
 export function CustomDropdownContainer(props) {
     const { dropdownIsOpen, dropdownItems, setDropdownIsOpen, handleDropdownItemClick, handleSetInputValue, inputValueToSet, searchStatus, ...otherProps } = props
     
@@ -46,13 +60,25 @@ export function CustomDropdownContainer(props) {
         // <ClickAwayListener onClickAway={() => dropdownIsOpen && setDropdownIsOpen(false)}>
             <Styles.DropdownContainer open={dropdownIsOpen} { ...otherProps }>
                 { dropdownItems.length > 0 ? dropdownItems.map(({ TokenId, ...dropdownItemDetails }) => (
-                    <CustomSelectBox 
-                        key={TokenId} 
-                        id={TokenId}
-                        isDropdownItem 
-                        handleClick={() => handleItemClick({ TokenId, ...dropdownItemDetails })}
-                        { ...dropdownItemDetails } 
-                    />
+                    
+                        !otherProps.createPair ? (
+                            <CustomSelectBox 
+                                key={TokenId} 
+                                id={TokenId}
+                                isDropdownItem 
+                                handleClick={() => handleItemClick({ TokenId, ...dropdownItemDetails })}
+                                { ...dropdownItemDetails } 
+                            />
+                        ) : (
+                            <CreatePairSelectBox 
+                                key={TokenId} 
+                                id={TokenId}
+                                isDropdownItem 
+                                handleClick={() => handleItemClick({ TokenId, ...dropdownItemDetails })}
+                                { ...dropdownItemDetails } 
+                            />
+                        )
+                    
                 )) : (
                     <LoaderContainer>
                         <span>No assets found</span>

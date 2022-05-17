@@ -32,7 +32,7 @@ const swiftSlice = createSlice({
     initialState: {
       swiftAccount: null,
       holdings: { ...DEFAULT, data: [{ TokenId: 0, Pair: 'Hbar', name: 'Algorand', unit: 'Algo', image: hbar }] },
-      accountInfo: DEFAULT
+      accountInfo: { ...DEFAULT, data: { Tokens: [] } }
     },
     reducers: {
         setAccountDatails(state) {
