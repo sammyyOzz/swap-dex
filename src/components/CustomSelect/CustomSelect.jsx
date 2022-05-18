@@ -59,26 +59,31 @@ export function CustomDropdownContainer(props) {
     return (
         // <ClickAwayListener onClickAway={() => dropdownIsOpen && setDropdownIsOpen(false)}>
             <Styles.DropdownContainer open={dropdownIsOpen} { ...otherProps }>
-                { dropdownItems.length > 0 ? dropdownItems.map(({ TokenId, ...dropdownItemDetails }) => (
+                
+                { ((dropdownItems.length > 0 && !otherProps.createPair)) ? dropdownItems.map(({ TokenId, ...dropdownItemDetails }) => (
                     
-                        !otherProps.createPair ? (
-                            <CustomSelectBox 
-                                key={TokenId} 
-                                id={TokenId}
-                                isDropdownItem 
-                                handleClick={() => handleItemClick({ TokenId, ...dropdownItemDetails })}
-                                { ...dropdownItemDetails } 
-                            />
-                        ) : (
-                            <CreatePairSelectBox 
-                                key={TokenId} 
-                                id={TokenId}
-                                isDropdownItem 
-                                handleClick={() => handleItemClick({ TokenId, ...dropdownItemDetails })}
-                                { ...dropdownItemDetails } 
-                            />
-                        )
+                    <CustomSelectBox 
+                        key={TokenId} 
+                        id={TokenId}
+                        isDropdownItem 
+                        handleClick={() => handleItemClick({ TokenId, ...dropdownItemDetails })}
+                        { ...dropdownItemDetails } 
+                    />
+                        
                     
+                )) : null }
+
+
+                { ((dropdownItems.length > 0 && otherProps.createPair)) ? dropdownItems.map(({ TokenId, ...dropdownItemDetails }) => (
+                    
+                    <CreatePairSelectBox 
+                        key={TokenId} 
+                        id={TokenId}
+                        isDropdownItem 
+                        handleClick={() => handleItemClick({ TokenId, ...dropdownItemDetails })}
+                        { ...dropdownItemDetails } 
+                    />
+                
                 )) : (
                     <LoaderContainer>
                         <span>No assets found</span>

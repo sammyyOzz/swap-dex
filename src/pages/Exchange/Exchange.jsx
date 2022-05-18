@@ -116,8 +116,26 @@ function ExchangeAlgo() {
     const isCreatePair = tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR
     const isRemoveLiquidity = tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY
 
+    const handleSuccessRes = data => {
+        if (typeof data === 'string') {
+            setResMessage(data)
+            return
+        }
+
+        const keys = Object.keys(data)
+        const key1 = keys[0]
+        const key2 = keys[1] || ''
+
+        const value1 = data[key1]
+        const value2 = data[key2] || ''
+
+        const text = `${key1}: ${value1}, ${key2}: ${value2}`
+        setResMessage(text)
+    }
 
     const handleSwap = () => {
+
+        if (fromSelectedItem.TokenId === toSelectedItem.TokenId) return
 
         if (isAddLiquidity) {
             handleSubmit(addLiquidity({ 
@@ -129,13 +147,11 @@ function ExchangeAlgo() {
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res || "")
+                handleSuccessRes(res)
                 resetValues()
                 console.log(res);
             },
             (err) => {
-                handleModalOpen()
-                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
@@ -149,13 +165,12 @@ function ExchangeAlgo() {
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res || "")
+                // setResMessage(res)
+                handleSuccessRes(res)
                 resetValues()
                 console.log(res);
             },
             (err) => {
-                handleModalOpen()
-                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
@@ -168,7 +183,8 @@ function ExchangeAlgo() {
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res || "")
+                // setResMessage(res)
+                handleSuccessRes(res)
                 resetValues()
                 console.log(res);
             },
@@ -187,17 +203,17 @@ function ExchangeAlgo() {
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res || "")
+                // setResMessage(res)
+                handleSuccessRes(res)
                 resetValues()
                 console.log(res);
             },
             (err) => {
                 handleModalOpen()
-                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
-        } else if (tabValue === SWAP && fromSelectedItem.TokenId != 0 && toSelectedItem.TokenId == 0) {
+        } else if (isSwap && (fromSelectedItem.TokenId != 0) && (toSelectedItem.TokenId == 0)) {
             handleSubmit(tokenToHbar({
                 tid: fromSelectedItem.TokenId,
                 tamount: fromInputValue,
@@ -206,17 +222,16 @@ function ExchangeAlgo() {
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res || "")
+                // setResMessage(res)
+                handleSuccessRes(res)
                 resetValues()
                 console.log(res);
             },
             (err) => {
-                handleModalOpen()
-                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
-        } else if (tabValue === SWAP && fromSelectedItem.TokenId != 0 && toSelectedItem.TokenId != 0) {
+        } else if (isSwap && (fromSelectedItem.TokenId != 0) && (toSelectedItem.TokenId != 0)) {
             handleSubmit(tokenToToken({
                 fromid: fromSelectedItem.TokenId,
                 toid: toSelectedItem.TokenId,
@@ -225,14 +240,13 @@ function ExchangeAlgo() {
                 acctkey: swiftAccount?.privateKey
             }),
             (res) => {
+                // setResMessage(res)
                 handleModalOpen()
-                setResMessage(res || "")
+                handleSuccessRes(res)
                 resetValues()
                 console.log(res);
             },
             (err) => {
-                handleModalOpen()
-                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
@@ -249,7 +263,7 @@ function ExchangeAlgo() {
     useEffect(() => {
         const inputRateTimer = setTimeout(() => {
 
-            if (fromInputValue > 0) {
+            if ((fromInputValue > 0) && (fromSelectedItem.TokenId !== toSelectedItem.TokenId)) {
 
                 if (isCreatePair || isRemoveLiquidity) {
                     return
@@ -268,7 +282,7 @@ function ExchangeAlgo() {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
                         const amount = isAddLiquidity 
-                            ? (Number(data["Token Amount"]) * 1.009)
+                            ? (Number(data["Token Amount"]) * 1.01)
                             : data["Token Amount"]
                         handleSetToInputValue(amount.toFixed(5))
                         setLiquidityValueToSend(amount)
