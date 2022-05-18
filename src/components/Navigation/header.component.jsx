@@ -36,9 +36,14 @@ export function Header() {
                     </Link>
                 ) : <></>}
             </div>
-            <div className="header__warning">
-                <img src={warningImage} alt="" className="header__warning-image" />
-                <span>This is a testnet project, do not deposit mainnet funds!!!</span>
+            <div className="header__warning-container">
+                <div className="header__warning">
+                    <img src={warningImage} alt="" className="header__warning-image" />
+                    <span>This is a testnet project, do not deposit mainnet funds!!!</span>
+                </div>
+                <div>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSeyLZpxbeWCKxZQbqfJhwYyIUHusLhyjbF9oz1MW4gzsxbSww/viewform?usp=send_form" target="_blank">REPORT</a>
+                </div>
             </div>
         </> 
     )

@@ -294,7 +294,7 @@ function ExchangeAlgo() {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
                         const amount = isAddLiquidity 
-                            ? (Number(data["Token Amount"]) * 1.012)
+                            ? (Number(data["Token Amount"]) * 1.017)
                             : data["Token Amount"]
                         handleSetToInputValue(amount.toFixed(5))
                         setLiquidityValueToSend(amount)
@@ -545,10 +545,6 @@ function ExchangeAlgo() {
                                 </Button>
                             </Styles.ButtonContainer>
                         </Styles.Root>
-
-                        <p style={{ fontWeight: 500, textDecoration: 'underline', marginTop: '70px' }}>
-                            Give a report: <a href="https://docs.google.com/forms/d/e/1FAIpQLSeyLZpxbeWCKxZQbqfJhwYyIUHusLhyjbF9oz1MW4gzsxbSww/viewform?usp=send_form" target="_blank">here</a>
-                        </p>
                     </Grid>
 
                     <Grid item container xs={12} md={6}>
