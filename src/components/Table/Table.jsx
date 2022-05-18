@@ -24,7 +24,7 @@ function Table({ columnTitles, rows, noDataTitle, noDataText, columnsToHideOnMob
                 (!rows || rows.length === 0) && (
                     <Styles.EmptyTable>
                         <h1>{noDataTitle}</h1>
-                        <p>{noDataText}</p>
+                        {/* <p>{noDataText}</p> */}
                     </Styles.EmptyTable>
                 )
             }
