@@ -24,14 +24,14 @@ export function CustomSelectBox({ TokenId, Pair, unit, handleClick, isDropdownIt
     )
 }
 
-export function CreatePairSelectBox({ TokenId, TokenSymbol, TokenBalance, TokenName, handleClick }) {
+export function CreatePairSelectBox({ TokenId, TokenSymbol, TokenBalance, TokenName, handleClick, isDropdownItem }) {
 
     return (
-        <Styles.SelectionBox dropdownItem={true} onClick={handleClick}>
+        <Styles.SelectionBox dropdownItem={isDropdownItem} onClick={handleClick}>
             <Styles.Logo src={TokenId == 0 ? hbar : noAssetImage} alt="" />
             <Styles.NameBox>
                 <div className="title">{TokenSymbol}</div>
-                <div className="subtitle">{`$${TokenSymbol}---$${TokenBalance}`}</div>
+                { isDropdownItem && <div className="subtitle">{`$${TokenSymbol}---$${TokenBalance}`}</div> }
             </Styles.NameBox>
         </Styles.SelectionBox>
     )

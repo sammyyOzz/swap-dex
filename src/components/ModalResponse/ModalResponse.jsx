@@ -11,10 +11,10 @@ function ModalResponse({ success, title, description, handleClick, buttonText, h
             { !hideImageAndTitle && (
                 <>
                     <img src={ success ? successImg : errorImg } alt="" />
-                    <Styles.Title>{ title }</Styles.Title>
+                    <Styles.Title>{ title || "" }</Styles.Title>
                 </>
             )}
-            <Styles.Description>{ description }</Styles.Description>
+            <Styles.Description>{ description || "" }</Styles.Description>
             {
                 handleClick && <Button>{ buttonText }</Button>
             }

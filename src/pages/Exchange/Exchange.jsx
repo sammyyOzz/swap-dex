@@ -12,7 +12,7 @@ import ModalResponse from '../../components/ModalResponse/ModalResponse'
 import useModal from '../../Hooks/Modal'
 import useSubmit from '../../Hooks/Submit'
 import { ThreeDots } from 'react-loader-spinner'
-import { CustomDropdownContainer, CustomSelectBox, CustomSelectInput } from '../../components/CustomSelect/CustomSelect'
+import { CreatePairSelectBox, CustomDropdownContainer, CustomSelectBox, CustomSelectInput } from '../../components/CustomSelect/CustomSelect'
 import useCustomSelect from '../../Hooks/CustomSelect'
 import useFormControl from '../../Hooks/FormControl'
 import { useSearchAssetByIdCompare } from '../../Hooks/SearchAssetById'
@@ -80,7 +80,6 @@ function ExchangeAlgo() {
     // const swapValueError = errorMessage?.error
     const { data: holdingsData, status: holdingsStatus } = useSelector(state => state.swift.holdings)
 
-    const [resSuccess, setResSuccess] = useState(false)
     const [resMessage, setResMessage] = useState('')
 
     const { modalState, handleModalOpen, handleModalClose } = useModal()
@@ -93,12 +92,17 @@ function ExchangeAlgo() {
     const accountInfo = useSelector(state => state.swift.accountInfo.data)
     const accountTokens = accountInfo?.Tokens
 
+    const [liquidityValueToSend, setLiquidityValueToSend] = useState(0)
 
     console.log('swift error', swiftdexError)
 
     const resetValues = () => {
-        setFromSelectedItem({ TokenId: 0, Pair: 'Hbar', amount: 0, unit: 'Algo' })
-        setToSelectedItem({ TokenId: 0, Pair: 'Hbar', amount: 0, unit: 'Algo' })
+        const dataToSet = isCreatePair
+            ? { TokenId: 0, TokenSymbol: 'Hbar', amount: 0, unit: 'Algo' }
+            : { TokenId: 0, Pair: 'Hbar', amount: 0, unit: 'Algo' }
+
+        setFromSelectedItem(dataToSet)
+        setToSelectedItem(dataToSet)
         handleSetFromInputValue("")
         handleSetToInputValue("")
     }
@@ -107,63 +111,55 @@ function ExchangeAlgo() {
         resetValues()
     }, [tabValue, liquiditySubtabValue])
 
-    // const swapResponseCallback = () => {
-    //     resetValues()
-    //     handleModalOpen()
-    //     dispatch(getActiveAlgorandWallet())
-    // }
+    const isSwap = tabValue === SWAP
+    const isAddLiquidity = tabValue === LIQUIDITY && liquiditySubtabValue === ADD_LIQUIDITY
+    const isCreatePair = tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR
+    const isRemoveLiquidity = tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY
 
-    // const [buttonIsEnabled, setButtonIsEnabled] = useState(false)
-
-    // useEffect(() => {
-    //     if (tabValue === SWAP && fromInputValue && toInputValue) {
-    //         setButtonIsEnabled(true)
-    //     } else if (tab)
-    // }, [liquiditySubtabValue, tabValue])
 
     const handleSwap = () => {
 
-        if (tabValue === LIQUIDITY && liquiditySubtabValue === ADD_LIQUIDITY) {
+        if (isAddLiquidity) {
             handleSubmit(addLiquidity({ 
-                tid: fromSelectedItem.TokenId || toSelectedItem.TokenId, 
-                tamount: fromSelectedItem.TokenId ? fromInputValue : toInputValue,
-                hamount: fromSelectedItem.TokenId ? toInputValue : fromInputValue, 
+                tid: toSelectedItem.TokenId, 
+                tamount: toInputValue,
+                hamount: fromInputValue, 
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res)
+                setResMessage(res || "")
                 resetValues()
                 console.log(res);
             },
             (err) => {
                 handleModalOpen()
-                setResMessage(err)
+                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
-        } else if (tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR) {
+        } else if (isCreatePair) {
             handleSubmit(createPair({ 
-                tid: fromSelectedItem.TokenId || toSelectedItem.TokenId, 
-                tamount: fromSelectedItem.TokenId ? fromInputValue : toInputValue,
-                hamount: fromSelectedItem.TokenId ? toInputValue : fromInputValue,
+                tid: toSelectedItem.TokenId, 
+                tamount: toInputValue,
+                hamount: fromInputValue, 
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res)
+                setResMessage(res || "")
                 resetValues()
                 console.log(res);
             },
             (err) => {
                 handleModalOpen()
-                setResMessage(err)
+                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
-        } else if (tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) {
+        } else if (isRemoveLiquidity) {
             handleSubmit(removeLiquidity({
                 tid: fromSelectedItem.TokenId, 
                 tamount: fromInputValue,
@@ -172,13 +168,13 @@ function ExchangeAlgo() {
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res)
+                setResMessage(res || "")
                 resetValues()
                 console.log(res);
             },
             (err) => {
                 handleModalOpen()
-                setResMessage(err)
+                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
@@ -191,13 +187,13 @@ function ExchangeAlgo() {
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res)
+                setResMessage(res || "")
                 resetValues()
                 console.log(res);
             },
             (err) => {
                 handleModalOpen()
-                setResMessage(err)
+                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
@@ -210,13 +206,13 @@ function ExchangeAlgo() {
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res)
+                setResMessage(res || "")
                 resetValues()
                 console.log(res);
             },
             (err) => {
                 handleModalOpen()
-                setResMessage(err)
+                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
@@ -230,13 +226,13 @@ function ExchangeAlgo() {
             }),
             (res) => {
                 handleModalOpen()
-                setResMessage(res)
+                setResMessage(res || "")
                 resetValues()
                 console.log(res);
             },
             (err) => {
                 handleModalOpen()
-                setResMessage(err)
+                setResMessage(err || "")
                 resetValues()
                 console.log(err);
             })
@@ -245,11 +241,6 @@ function ExchangeAlgo() {
     const selectSwap = state => state.algorand.swap
     const selectLiquidity = state => state.algorand.liquidity
 
-    const selectStatusOption = tabValue === SWAP ? selectSwap : selectLiquidity
-
-    const { status, error: errorData } = useSelector(selectStatusOption)
-    const error = errorData?.error
-    const success = status === HTTP_STATUS.FULFILLED
 
 
     /**
@@ -259,10 +250,8 @@ function ExchangeAlgo() {
         const inputRateTimer = setTimeout(() => {
 
             if (fromInputValue > 0) {
-                if (
-                    ((tabValue === LIQUIDITY) && (liquiditySubtabValue === CREATE_PAIR)) ||
-                    ((tabValue === LIQUIDITY) && (liquiditySubtabValue === REMOVE_LIQUIDITY))
-                ) {
+
+                if (isCreatePair || isRemoveLiquidity) {
                     return
                 }
 
@@ -278,10 +267,11 @@ function ExchangeAlgo() {
                     .then(data => {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
-                        const amount = ((tabValue === LIQUIDITY) && (liquiditySubtabValue === ADD_LIQUIDITY)) 
+                        const amount = isAddLiquidity 
                             ? (Number(data["Token Amount"]) * 1.009)
                             : data["Token Amount"]
-                        handleSetToInputValue(amount)
+                        handleSetToInputValue(amount.toFixed(5))
+                        setLiquidityValueToSend(amount)
                         if (typeof(data) !== 'object') setSwiftdexError(data)
                     })
                     .catch(err => {
@@ -361,23 +351,6 @@ function ExchangeAlgo() {
         setSwiftdexError(null)
     }, [tabValue, liquiditySubtabValue])
 
-    const resetToSelectedValues = () => {
-        setToSelectedItem("")
-        handleSetToInputValue("")
-    }
-
-    const handleFromInputFocus = () => {
-        if ((liquiditySubtabValue === CREATE_PAIR) || (liquiditySubtabValue === REMOVE_LIQUIDITY)) return
-        setSwapIds({ from: fromSelectedItem.TokenId, to: toSelectedItem.TokenId })
-        handleSetToInputValue("")
-    }
-
-    const handleToInputFocus = () => {
-        if ((liquiditySubtabValue === CREATE_PAIR) || (liquiditySubtabValue === REMOVE_LIQUIDITY)) return
-        setSwapIds({ from: toSelectedItem.TokenId, to: fromSelectedItem.TokenId })
-        handleSetFromInputValue("")
-    }
-
 
     useEffect(() => {
         if (holdingsStatus === null) {
@@ -450,14 +423,21 @@ function ExchangeAlgo() {
 
                                     <ClickAwayListener onClickAway={() => setFromDropdownIsOpen(false)}>
                                         <div>
-                                            <CustomSelectBox 
-                                                { ...fromSelectedItem } 
-                                                handleClick={!((tabValue === LIQUIDITY) && (liquiditySubtabValue === ADD_LIQUIDITY)) && toggleFromDropdownIsOpen} 
-                                            />
+                                            { !isCreatePair ? (
+                                                <CustomSelectBox 
+                                                    { ...fromSelectedItem } 
+                                                    handleClick={!isAddLiquidity && toggleFromDropdownIsOpen} 
+                                                />
+                                            ) : (
+                                                <CreatePairSelectBox 
+                                                    { ...fromSelectedItem } 
+                                                    // handleClick={!isAddLiquidity && toggleFromDropdownIsOpen} 
+                                                />
+                                            )}
 
                                             <CustomDropdownContainer 
-                                                dropdownItems={(tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR) ? accountTokens : holdingsData} 
-                                                createPair={tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR}
+                                                dropdownItems={isCreatePair ? accountTokens : holdingsData} 
+                                                createPair={isCreatePair}
                                                 dropdownIsOpen={fromDropdownIsOpen}
                                                 setDropdownIsOpen={setFromDropdownIsOpen}
                                                 handleDropdownItemClick={setFromSelectedItem}
@@ -481,20 +461,24 @@ function ExchangeAlgo() {
                                         } */}
                                     </Styles.Info>
                                 </div>
-                                { !(tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) && <img src={exchangeLogo} alt="" />}
+                                { !isRemoveLiquidity && <img src={exchangeLogo} alt="" />}
                             </Styles.Container>
 
-                            { !(tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY) && (
+                            { !isRemoveLiquidity && (
                                 <Styles.Container>
                                     <div className="innerContainer" style={{ padding: '20px 0' }}>
 
                                     <ClickAwayListener onClickAway={() => setToDropdownIsOpen(false)}>
                                         <div>
-                                            <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} /> 
+                                            { !isCreatePair ? (
+                                                <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} />
+                                            ) : (
+                                                <CreatePairSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} />
+                                            )} 
 
                                             <CustomDropdownContainer 
-                                                dropdownItems={(tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR) ? accountTokens : holdingsData} 
-                                                createPair={tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR}
+                                                dropdownItems={isCreatePair ? accountTokens : holdingsData} 
+                                                createPair={isCreatePair}
                                                 dropdownIsOpen={toDropdownIsOpen}
                                                 setDropdownIsOpen={setToDropdownIsOpen}
                                                 handleDropdownItemClick={setToSelectedItem}
@@ -506,8 +490,8 @@ function ExchangeAlgo() {
                                         <CustomSelectInput 
                                             placeholder="0.00" 
                                             value={toInputValue}
-                                            onChange={ !((tabValue === LIQUIDITY) && (liquiditySubtabValue === ADD_LIQUIDITY)) && handleToInputChange}
-                                            readyOnly={(tabValue === LIQUIDITY) && (liquiditySubtabValue === ADD_LIQUIDITY)}
+                                            onChange={!isAddLiquidity && handleToInputChange}
+                                            readyOnly={isAddLiquidity}
                                             // onFocus={handleToInputFocus}
                                         />
 
@@ -530,7 +514,7 @@ function ExchangeAlgo() {
                                     onClick={handleSwap}>
                                         { tabValue === SWAP 
                                             ? "swap" 
-                                            : (liquiditySubtabValue === ADD_LIQUIDITY ? 'Add liquidity' : liquiditySubtabValue === CREATE_PAIR ? 'Create Pair' : 'Remove liquidity') 
+                                            : (isAddLiquidity ? 'Add liquidity' : isCreatePair ? 'Create Pair' : 'Remove liquidity') 
                                         }
                                 </Button>
                             </Styles.ButtonContainer>
@@ -589,9 +573,9 @@ function ExchangeAlgo() {
             <Modal open={modalState} handleClose={handleModalClose}>
                 <ModalResponse
                     hideImageAndTitle
-                    success={resSuccess}
-                    title={resSuccess ? 'success' : 'error'}
-                    description={resMessage}
+                    // success={resSuccess}
+                    // title={resSuccess ? 'success' : 'error'}
+                    description={resMessage ? resMessage : ""}
                 />
             </Modal>
         </>
