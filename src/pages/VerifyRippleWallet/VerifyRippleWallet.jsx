@@ -130,6 +130,7 @@ function VerifyRippleWallet() {
 
     const handleSubmitForm = () => {
         if (option === 'create') {
+            saveAccountDetails({ account_ID, privateKey, mnemonic })
             localStorage.setItem('swift_dex', JSON.stringify({ account_ID, privateKey, mnemonic }))
             navigate('/exchange')
 
@@ -153,7 +154,6 @@ function VerifyRippleWallet() {
                     setError('something went wrong')
                 }
             )
-
         }
     }
 

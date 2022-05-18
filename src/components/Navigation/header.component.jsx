@@ -26,13 +26,13 @@ export function Header() {
                 <img src={balloxLogo} alt="" className="header__logo" />
             </Link>
 
-            { swiftAccount?.account_ID && (
+            { swiftAccount?.account_ID ? (
                 <Link to="/exchange">
                     <div className="header__right">
                         <Button outlined>Dashboard</Button>
                     </div>
                 </Link>
-            )}
+            ) : <></>}
         </div>
     )
 }

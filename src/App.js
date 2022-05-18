@@ -25,7 +25,7 @@ function App() {
     if (swiftAccount?.account_ID) {
       dispatch(getAccountInfo({ urlParams: `/${swiftAccount?.account_ID}`})).then(res => console.log(res))
     }
-  }, [swiftAccount?.account_ID])
+  }, [swiftAccount])
 
   return (
     <Router>

@@ -341,7 +341,7 @@ function ExchangeAlgo() {
         }, 1000)
 
         return () => clearTimeout(inputRateTimer)
-    }, [fromSelectedItem.TokenId, fromInputValue])
+    }, [fromSelectedItem.TokenId, fromInputValue, toSelectedItem.TokenId])
 
     useEffect(() => {
         if (tabValue === SWAP) handleSetToInputValue("")
@@ -402,12 +402,11 @@ function ExchangeAlgo() {
             <Layout fullScreen>
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
-
                     
                         <Styles.Root>
                             {/* <Styles.Title>Swap</Styles.Title> */}
 
-                            <p style={{ fontSize: "22px" }}>Balance: {accountInfo["Hbar Balance"] || '____'}</p>
+                            <p style={{ fontSize: "22px" }}>Balance: {accountInfo["Hbar Balance"] ? accountInfo["Hbar Balance"] : '_ __ _'}</p>
 
                             <div style={{ margin: '0 0 30px 20px'  }}>
                                 <MyTabs
@@ -438,10 +437,13 @@ function ExchangeAlgo() {
 
                                     <ClickAwayListener onClickAway={() => setFromDropdownIsOpen(false)}>
                                         <div>
-                                            <CustomSelectBox { ...fromSelectedItem } handleClick={toggleFromDropdownIsOpen} />
+                                            <CustomSelectBox 
+                                                { ...fromSelectedItem } 
+                                                handleClick={!((tabValue === LIQUIDITY) && (liquiditySubtabValue === ADD_LIQUIDITY)) && toggleFromDropdownIsOpen} 
+                                            />
 
                                             <CustomDropdownContainer 
-                                                dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : (accountTokens || [])} 
+                                                dropdownItems={(tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR) ? accountTokens : holdingsData} 
                                                 createPair={tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR}
                                                 dropdownIsOpen={fromDropdownIsOpen}
                                                 setDropdownIsOpen={setFromDropdownIsOpen}
@@ -478,7 +480,7 @@ function ExchangeAlgo() {
                                             <CustomSelectBox { ...toSelectedItem } handleClick={toggleToDropdownIsOpen} /> 
 
                                             <CustomDropdownContainer 
-                                                dropdownItems={liquiditySubtabValue !== CREATE_PAIR ? holdingsData : (accountTokens || [])} 
+                                                dropdownItems={(tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR) ? accountTokens : holdingsData} 
                                                 createPair={tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR}
                                                 dropdownIsOpen={toDropdownIsOpen}
                                                 setDropdownIsOpen={setToDropdownIsOpen}
@@ -491,7 +493,8 @@ function ExchangeAlgo() {
                                         <CustomSelectInput 
                                             placeholder="0.00" 
                                             value={toInputValue}
-                                            onChange={handleToInputChange}
+                                            onChange={ !((tabValue === LIQUIDITY) && (liquiditySubtabValue === ADD_LIQUIDITY)) && handleToInputChange}
+                                            readyOnly={(tabValue === LIQUIDITY) && (liquiditySubtabValue === ADD_LIQUIDITY)}
                                             // onFocus={handleToInputFocus}
                                         />
 
