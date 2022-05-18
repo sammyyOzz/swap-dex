@@ -152,8 +152,8 @@ function VerifyRippleWallet() {
                 importType(data),
                 (res) => {
                     console.log(res)
-                    localStorage.setItem('swift_dex', JSON.stringify(data));
-                    dispatch(saveAccountDetails(data))
+                    localStorage.setItem('swift_dex', JSON.stringify({ account_ID: data.id, privateKey: data.key }));
+                    dispatch(saveAccountDetails({ account_ID: data.id, privateKey: data.key }))
                     navigate('/exchange')
                 },
                 (err) => {
