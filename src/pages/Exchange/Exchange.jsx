@@ -19,7 +19,7 @@ import { useSearchAssetByIdCompare } from '../../Hooks/SearchAssetById'
 import useTabs from '../../Hooks/Tabs'
 import MyTabs from '../../components/MyTabs/MyTabs'
 import ClickAwayListener from 'react-click-away-listener'
-import { addLiquidity, createPair, getHbarAmount, getTokenAmount, hbarToToken, removeLiquidity, tokenToHbar, tokenToToken, getLiquidityPool, logout } from '../../app/swift/swiftSlice'
+import { addLiquidity, createPair, getHbarAmount, getTokenAmount, hbarToToken, removeLiquidity, tokenToHbar, tokenToToken, getLiquidityPool, logout, getAccountInfo } from '../../app/swift/swiftSlice'
 import Layout from '../../components/Layout/Layout'
 import Table from '../../components/Table/Table'
 import { ButtonsContainer } from '../../components/UI/WalletShared/walletShared'
@@ -149,6 +149,8 @@ function ExchangeAlgo() {
                 handleModalOpen()
                 handleSuccessRes(res)
                 resetValues()
+                dispatch(getLiquidityPool())
+                dispatch(getAccountInfo())
                 console.log(res);
             },
             (err) => {
@@ -168,6 +170,8 @@ function ExchangeAlgo() {
                 // setResMessage(res)
                 handleSuccessRes(res)
                 resetValues()
+                dispatch(getLiquidityPool())
+                dispatch(getAccountInfo())
                 console.log(res);
             },
             (err) => {
@@ -186,6 +190,8 @@ function ExchangeAlgo() {
                 // setResMessage(res)
                 handleSuccessRes(res)
                 resetValues()
+                dispatch(getLiquidityPool())
+                dispatch(getAccountInfo())
                 console.log(res);
             },
             (err) => {
@@ -206,6 +212,8 @@ function ExchangeAlgo() {
                 // setResMessage(res)
                 handleSuccessRes(res)
                 resetValues()
+                dispatch(getLiquidityPool())
+                dispatch(getAccountInfo())
                 console.log(res);
             },
             (err) => {
@@ -225,6 +233,8 @@ function ExchangeAlgo() {
                 // setResMessage(res)
                 handleSuccessRes(res)
                 resetValues()
+                dispatch(getLiquidityPool())
+                dispatch(getAccountInfo())
                 console.log(res);
             },
             (err) => {
@@ -244,6 +254,8 @@ function ExchangeAlgo() {
                 handleModalOpen()
                 handleSuccessRes(res)
                 resetValues()
+                dispatch(getLiquidityPool())
+                dispatch(getAccountInfo())
                 console.log(res);
             },
             (err) => {
@@ -282,7 +294,7 @@ function ExchangeAlgo() {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
                         const amount = isAddLiquidity 
-                            ? (Number(data["Token Amount"]) * 1.01)
+                            ? (Number(data["Token Amount"]) * 1.012)
                             : data["Token Amount"]
                         handleSetToInputValue(amount.toFixed(5))
                         setLiquidityValueToSend(amount)
@@ -459,7 +471,7 @@ function ExchangeAlgo() {
                                             />
                                         </div>
                                     </ClickAwayListener>    
-
+                                    { isRemoveLiquidity && <Styles.RemoveLiquidityText>LP share amount:</Styles.RemoveLiquidityText> }
                                     <CustomSelectInput 
                                         placeholder="0.00" 
                                         value={fromInputValue}
@@ -533,6 +545,8 @@ function ExchangeAlgo() {
                                 </Button>
                             </Styles.ButtonContainer>
                         </Styles.Root>
+
+                        <p style={{ fontWeight: 500, textDecoration: 'underline', marginTop: '70px' }}>Give a report: <a href="https://docs.google.com/forms/d/e/1FAIpQLSeyLZpxbeWCKxZQbqfJhwYyIUHusLhyjbF9oz1MW4gzsxbSww/viewform?usp=send_form">here</a></p>
                     </Grid>
 
                     <Grid item container xs={12} md={6}>

@@ -135,3 +135,8 @@ export const TableBox = styled.div`
     box-sizing: border-box;
     padding: 10px 20px 40px 20px;
 `
+export const RemoveLiquidityText = styled.p`
+    font-weight: 500;
+    font-size: 14px;
+    margin: 5px 0;
+`
