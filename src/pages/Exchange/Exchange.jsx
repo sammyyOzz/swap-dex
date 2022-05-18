@@ -122,7 +122,7 @@ function ExchangeAlgo() {
         if (isAddLiquidity) {
             handleSubmit(addLiquidity({ 
                 tid: toSelectedItem.TokenId, 
-                tamount: toInputValue,
+                tamount: liquidityValueToSend,
                 hamount: fromInputValue, 
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
