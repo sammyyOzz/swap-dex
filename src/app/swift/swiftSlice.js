@@ -30,18 +30,24 @@ const DEFAULT = { status: null, data: null, error: null }
 const swiftSlice = createSlice({
     name: 'swift',
     initialState: {
-      swiftAccount: null,
+      swiftAccount: DEFAULT,
       holdings: { ...DEFAULT, data: [{ TokenId: 0, Pair: 'Hbar', name: 'Algorand', unit: 'Algo', image: hbar }] },
       accountInfo: { ...DEFAULT, data: { Tokens: [] } }
     },
     reducers: {
         setAccountDatails(state) {
             if (localStorage.getItem('swift_dex')) {
-                state.swiftAccount = JSON.parse(localStorage.getItem('swift_dex'))
+                state.swiftAccount.data = JSON.parse(localStorage.getItem('swift_dex'))
             }
         },
         saveAccountDetails(state, { payload }) {
-            state.swiftAccount = payload
+            state.swiftAccount.data = payload
+        },
+        logout(state) {
+            state.swiftAccount = DEFAULT
+            state.holdings = { ...DEFAULT, data: [{ TokenId: 0, Pair: 'Hbar', name: 'Algorand', unit: 'Algo', image: hbar }] }
+            state.accountInfo = { ...DEFAULT, data: { Tokens: [] } }
+            localStorage.removeItem('swift_dex')
         }
     },
 
@@ -72,7 +78,7 @@ const swiftSlice = createSlice({
     }
 })
 
-export const { setAccountDatails, saveAccountDetails } = swiftSlice.actions
+export const { setAccountDatails, saveAccountDetails, logout } = swiftSlice.actions
   
 
 export default swiftSlice.reducer

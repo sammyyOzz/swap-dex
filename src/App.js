@@ -15,17 +15,17 @@ import { Header } from './components/Navigation/header.component';
 
 function App() {
   const dispatch = useDispatch()
-  const swiftAccount = useSelector(state => state.swift.swiftAccount)
+  const { data: swiftAccountData } = useSelector(state => state.swift.swiftAccount)
 
   useEffect(() => {
     dispatch(setAccountDatails())
   }, [])
 
   useEffect(() => {
-    if (swiftAccount?.account_ID) {
-      dispatch(getAccountInfo({ urlParams: `/${swiftAccount?.account_ID}`})).then(res => console.log(res))
+    if (swiftAccountData?.account_ID) {
+      dispatch(getAccountInfo({ urlParams: `/${swiftAccountData?.account_ID}`})).then(res => console.log(res))
     }
-  }, [swiftAccount])
+  }, [swiftAccountData])
 
   return (
     <Router>

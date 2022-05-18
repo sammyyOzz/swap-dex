@@ -125,3 +125,13 @@ export const LoaderContainer2 = styled(LoaderContainer)`
         margin: -30px 0 -30px 0;
     }
 `
+
+export const TableBox = styled.div`
+    /* margin-bottom: 40px; */
+    /* min-height: 600px; */
+    max-height: 600px;
+    overflow-x: auto;
+    overflow-y: scroll;
+    box-sizing: border-box;
+    padding: 10px 20px 40px 20px;
+`

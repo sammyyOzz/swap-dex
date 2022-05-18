@@ -6,11 +6,12 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Button } from '../UI/Button/button'
 // import { Sidebar } from './sidebar.component'
+import warningImage from '../../assets/icons/error.png'
 
 export function Header() {
     const { pathname } = useLocation()
     const navigate = useNavigate()
-    const swiftAccount = useSelector(state => state.swift.swiftAccount)
+    const { data: swiftAccount } = useSelector(state => state.swift.swiftAccount)
     console.log(swiftAccount?.account_ID)
 
     useEffect(() => {
@@ -20,19 +21,25 @@ export function Header() {
     }, [swiftAccount?.account_ID])
 
     return (
-        <div className="header">
-            <Link to="/">
-                {/* <div className="header__title">SWIFT_DEX</div> */}
-                <img src={balloxLogo} alt="" className="header__logo" />
-            </Link>
-
-            { swiftAccount?.account_ID ? (
-                <Link to="/exchange">
-                    <div className="header__right">
-                        <Button outlined>Dashboard</Button>
-                    </div>
+        <>
+            <div className="header">
+                <Link to="/">
+                    {/* <div className="header__title">SWIFT_DEX</div> */}
+                    <img src={balloxLogo} alt="" className="header__logo" />
                 </Link>
-            ) : <></>}
-        </div>
+
+                { swiftAccount?.account_ID ? (
+                    <Link to="/exchange">
+                        <div className="header__right">
+                            <Button outlined>Dashboard</Button>
+                        </div>
+                    </Link>
+                ) : <></>}
+            </div>
+            <div className="header__warning">
+                <img src={warningImage} alt="" className="header__warning-image" />
+                <span>This is a testnet project, do not deposit mainnet funds!!!</span>
+            </div>
+        </> 
     )
 }

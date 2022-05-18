@@ -22,6 +22,8 @@ import ClickAwayListener from 'react-click-away-listener'
 import { addLiquidity, createPair, getHbarAmount, getTokenAmount, hbarToToken, removeLiquidity, tokenToHbar, tokenToToken, getLiquidityPool } from '../../app/swift/swiftSlice'
 import Layout from '../../components/Layout/Layout'
 import Table from '../../components/Table/Table'
+import { ButtonsContainer } from '../../components/UI/WalletShared/walletShared'
+import { useNavigate } from 'react-router-dom'
 
 const SWAP = "Swap"
 const LIQUIDITY = "Liquidity"
@@ -37,6 +39,7 @@ const liquiditySubtabs = [ADD_LIQUIDITY, CREATE_PAIR, REMOVE_LIQUIDITY]
 
 
 function ExchangeAlgo() {
+    const navigate = useNavigate()
     const { tabValue, handleTabChange } = useTabs(tabs[0])
     const { 
         tabValue: liquiditySubtabValue, 
@@ -82,7 +85,7 @@ function ExchangeAlgo() {
 
     const { modalState, handleModalOpen, handleModalClose } = useModal()
 
-    const swiftAccount = useSelector(state => state.swift.swiftAccount)
+    const { data: swiftAccount} = useSelector(state => state.swift.swiftAccount)
     const [swiftdexStatus, setSwiftdexStatus] = useState(null)
     const [swiftdexError, setSwiftdexError] = useState('')
 
@@ -275,7 +278,10 @@ function ExchangeAlgo() {
                     .then(data => {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
-                        handleSetToInputValue(data["Token Amount"])
+                        const amount = ((tabValue === LIQUIDITY) && (liquiditySubtabValue === ADD_LIQUIDITY)) 
+                            ? (Number(data["Token Amount"]) * 1.003)
+                            : data["Token Amount"]
+                        handleSetToInputValue(amount)
                         if (typeof(data) !== 'object') setSwiftdexError(data)
                     })
                     .catch(err => {
@@ -379,6 +385,11 @@ function ExchangeAlgo() {
         }
     }, [])
 
+    const handleLogout = () => {
+        dispatch(logout())
+        navigate('/')
+    }
+
 
     const rows = holdingsData?.slice(1, holdingsData.length).map((item, i) => (
         <tr key={item.TokenId}>
@@ -400,12 +411,14 @@ function ExchangeAlgo() {
     return (
         <>
             <Layout fullScreen>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button onClick={handleLogout}>Remove my wallet</Button>
+                </div>
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
                     
                         <Styles.Root>
-                            {/* <Styles.Title>Swap</Styles.Title> */}
-
+                            
                             <p style={{ fontSize: "22px" }}>Balance: {accountInfo["Hbar Balance"] ? accountInfo["Hbar Balance"] : '_ __ _'}</p>
 
                             <div style={{ margin: '0 0 30px 20px'  }}>
@@ -418,7 +431,7 @@ function ExchangeAlgo() {
                             </div>
                             <Styles.Text>
                                 { tabValue === SWAP 
-                                    ? "Token should be added to your wallet before swapping." 
+                                    ? ""
                                     : (
                                         <MyTabs
                                             tabs={liquiditySubtabs}
@@ -528,40 +541,45 @@ function ExchangeAlgo() {
 
                     
 
-                        <Grid item xs={12} style={{ overflowX: 'auto', boxSizing: 'border-box', padding: '40px 20px' }}>
-
+                        <Grid item xs={12}>
+                            
                             { holdingsStatus === HTTP_STATUS.PENDING ? (
                                 <Styles.LoaderContainer2><ThreeDots height="100" width="200" color='gray' /></Styles.LoaderContainer2>
                             ) : (
                                 <>
-                                    <div style={{ margin: '10px auto 20px auto', fontWeight: 'bold', fontSize: '22px'}}>Token Pairs</div>
-                                    <Table
-                                        columnTitles={['pair', 'hbar reserve', 'token reserve']}
-                                        columnsToHideOnMobile={[]}
-                                        rows={rows}
-                                        noDataTitle="NO DATA TO DISPLAY"
-                                        noDataText="There is currntly nothing to be displayed yet."
-                                    /> 
+                                    <div style={{ margin: '50px auto 20px 10px', fontWeight: 'bold', fontSize: '22px'}}>Token Pairs</div>
+                                    <Styles.TableBox>
+                                        <Table
+                                            columnTitles={['pair', 'hbar reserve', 'token reserve']}
+                                            columnsToHideOnMobile={[]}
+                                            rows={rows}
+                                            noDataTitle="NO DATA TO DISPLAY"
+                                            noDataText="There is currntly nothing to be displayed yet."
+                                        /> 
+                                    </Styles.TableBox>  
                                 </>
                             )}
+                             
                         </Grid>
 
-                        <Grid item xs={12} style={{ overflowX: 'auto', boxSizing: 'border-box', padding: '40px 20px' }}>
+                        <Grid item xs={12}>
 
                             { accountStatus === HTTP_STATUS.PENDING ? (
-                                <Styles.LoaderContainer2><ThreeDots height="100" width="200" color='gray' /></Styles.LoaderContainer2>
+                                <Styles.LoaderContainer2 style={{ marginTop: '50px' }}><ThreeDots height="100" width="200" color='gray' /></Styles.LoaderContainer2>
                             ) : (
                                 <>
-                                    <div style={{ margin: '10px auto 20px auto', fontWeight: 'bold', fontSize: '22px'}}>My Tokens</div>
-                                    <Table
-                                        columnTitles={['symbol', 'balance', 'name']}
-                                        columnsToHideOnMobile={[]}
-                                        rows={tokenRows}
-                                        noDataTitle="NO DATA TO DISPLAY"
-                                        noDataText="There is currntly nothing to be displayed yet."
-                                    /> 
+                                    <div style={{ margin: '50px auto 20px 10px', fontWeight: 'bold', fontSize: '22px'}}>My Tokens</div>
+                                        <Styles.TableBox>
+                                            <Table
+                                                columnTitles={['symbol', 'balance', 'name']}
+                                                columnsToHideOnMobile={[]}
+                                                rows={tokenRows}
+                                                noDataTitle="NO DATA TO DISPLAY"
+                                                noDataText="There is currntly nothing to be displayed yet."
+                                            /> 
+                                        </Styles.TableBox>
                                 </>
-                            )}
+                            )}      
                         </Grid>
                     </Grid>
                 </Grid>

@@ -123,14 +123,21 @@ function VerifyRippleWallet() {
     }
 
 
-    const swiftAccount = useSelector(state => state.swift.swiftAccount)
+    const { data: swiftAccount } = useSelector(state => state.swift.swiftAccount)
+    console.log(swiftAccount?.account_ID)
+
+    useEffect(() => {
+        if (option === 'import' && swiftAccount?.account_ID) {
+            setError('A wallet already exists on this device, proceeding will override the existing wallet')
+        }
+    }, [swiftAccount?.account_ID])
 
 
     const { handleSubmit } = useSubmit()
 
     const handleSubmitForm = () => {
         if (option === 'create') {
-            saveAccountDetails({ account_ID, privateKey, mnemonic })
+            dispatch(saveAccountDetails({ account_ID, privateKey, mnemonic }))
             localStorage.setItem('swift_dex', JSON.stringify({ account_ID, privateKey, mnemonic }))
             navigate('/exchange')
 
@@ -146,7 +153,7 @@ function VerifyRippleWallet() {
                 (res) => {
                     console.log(res)
                     localStorage.setItem('swift_dex', JSON.stringify(data));
-                    saveAccountDetails(data)
+                    dispatch(saveAccountDetails(data))
                     navigate('/exchange')
                 },
                 (err) => {
@@ -167,8 +174,11 @@ function VerifyRippleWallet() {
                 {
                     option === 'import' && (
                         <>
-                            <p style={{ color: 'red' }}>{error}</p>
+                            
                             <Styles.Title>Import your wallet</Styles.Title>
+
+                            <p style={{ color: 'red' }}>{error}</p>
+                            
                             <FormControlRadio
                                 label="Import with"
                                 options={['Mnemonic', 'Private key']}

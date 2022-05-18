@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import WalletCard from '../../components/WalletCard/WalletCard'
 import * as Styles from './landing'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { createAccount, saveAccountDetails } from '../../app/swift/swiftSlice'
 import useSubmit from '../../Hooks/Submit'
 import Layout from '../../components/Layout/Layout'
@@ -14,11 +14,14 @@ function Landing() {
     const dispatch = useDispatch()
     const { handleSubmit } = useSubmit()
     const [error, setError] = useState('')
+
+    const { data: swiftAccount } = useSelector(state => state.swift.swiftAccount)
     
 
     const handleCreateWallet = () => {
-        if (localStorage.getItem('swift_dex')) {
+        if (swiftAccount?.account_ID) {
             setError('You already have an account')
+            return
         } else {
             
             handleSubmit(
@@ -48,13 +51,13 @@ function Landing() {
                 <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>
                 <WalletCard
                     title="create wallet"
-                    text="a new wallet will be created for you"
+                    text="swiftly create a hedera testnet account"
                     handleClick={handleCreateWallet}
                 />
                 <Link to="/wallet/import">
                     <WalletCard
                         title="import wallet"
-                        text="this wallet must already exist"
+                        text="import an existing account"
                         // handleClick={handleImportWallet}
                     />
                 </Link>
