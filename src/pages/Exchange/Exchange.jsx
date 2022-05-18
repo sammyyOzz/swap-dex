@@ -546,7 +546,9 @@ function ExchangeAlgo() {
                             </Styles.ButtonContainer>
                         </Styles.Root>
 
-                        <p style={{ fontWeight: 500, textDecoration: 'underline', marginTop: '70px' }}>Give a report: <a href="https://docs.google.com/forms/d/e/1FAIpQLSeyLZpxbeWCKxZQbqfJhwYyIUHusLhyjbF9oz1MW4gzsxbSww/viewform?usp=send_form">here</a></p>
+                        <p style={{ fontWeight: 500, textDecoration: 'underline', marginTop: '70px' }}>
+                            Give a report: <a href="https://docs.google.com/forms/d/e/1FAIpQLSeyLZpxbeWCKxZQbqfJhwYyIUHusLhyjbF9oz1MW4gzsxbSww/viewform?usp=send_form" target="_blank">here</a>
+                        </p>
                     </Grid>
 
                     <Grid item container xs={12} md={6}>
