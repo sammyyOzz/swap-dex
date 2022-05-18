@@ -298,10 +298,9 @@ function ExchangeAlgo() {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
                         const amount = isAddLiquidity 
-                            ? (Number((data["Token Amount"]) * 100) / 96)
+                            ? (Number((data["Token Amount"]) * 100) / 94)
                             : data["Token Amount"]
                         handleSetToInputValue(amount.toFixed(4))
-                        alert(JSON.stringify(amount))
                         setLiquidityValueToSend(amount.toFixed(4))
                         if (typeof(data) !== 'object') setSwiftdexError(data)
                     })
