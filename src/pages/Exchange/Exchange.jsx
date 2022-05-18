@@ -116,7 +116,7 @@ function ExchangeAlgo() {
     const isCreatePair = tabValue === LIQUIDITY && liquiditySubtabValue === CREATE_PAIR
     const isRemoveLiquidity = tabValue === LIQUIDITY && liquiditySubtabValue === REMOVE_LIQUIDITY
 
-    const handleSuccessRes = data => {
+    const handleSuccessRes = (data, divide) => {
         if (typeof data === 'string') {
             setResMessage(data)
             return
@@ -124,12 +124,16 @@ function ExchangeAlgo() {
 
         const keys = Object.keys(data)
         const key1 = keys[0]
-        const key2 = keys[1] || ''
+        const key2 = keys[1]
+        const key3 = keys[2] || ""
+        const key4 = keys[3] || ""
 
         const value1 = data[key1]
-        const value2 = data[key2] || ''
+        const value2 = data[key2]
+        const value3 = data[key3] || ""
+        const value4 = data[key4] || ""
 
-        const text = `${key1}: ${value1}, ${key2}: ${value2}`
+        const text = `${key1}: ${value1}, ${key2}: ${value2}, ${key3}: ${divide ? value3/(10**8) : value3}, ${key4}: ${value4}`
         setResMessage(text)
     }
 
@@ -140,14 +144,14 @@ function ExchangeAlgo() {
         if (isAddLiquidity) {
             handleSubmit(addLiquidity({ 
                 tid: toSelectedItem.TokenId, 
-                tamount: liquidityValueToSend,
-                hamount: fromInputValue, 
+                tamount: parseFloat(liquidityValueToSend),
+                hamount: parseFloat(fromInputValue), 
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
             }),
             (res) => {
                 handleModalOpen()
-                handleSuccessRes(res)
+                handleSuccessRes(res, 'divide')
                 resetValues()
                 dispatch(getLiquidityPool())
                 dispatch(getAccountInfo())
@@ -168,7 +172,7 @@ function ExchangeAlgo() {
             (res) => {
                 handleModalOpen()
                 // setResMessage(res)
-                handleSuccessRes(res)
+                handleSuccessRes(res, 'divide')
                 resetValues()
                 dispatch(getLiquidityPool())
                 dispatch(getAccountInfo())
@@ -294,10 +298,11 @@ function ExchangeAlgo() {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
                         const amount = isAddLiquidity 
-                            ? (Number(data["Token Amount"]) * 1.017)
+                            ? (Number((data["Token Amount"]) * 100) / 96)
                             : data["Token Amount"]
-                        handleSetToInputValue(amount.toFixed(5))
-                        setLiquidityValueToSend(amount)
+                        handleSetToInputValue(amount.toFixed(4))
+                        alert(JSON.stringify(amount))
+                        setLiquidityValueToSend(amount.toFixed(4))
                         if (typeof(data) !== 'object') setSwiftdexError(data)
                     })
                     .catch(err => {
