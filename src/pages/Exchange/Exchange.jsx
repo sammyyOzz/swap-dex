@@ -133,7 +133,7 @@ function ExchangeAlgo() {
         const value3 = data[key3] || ""
         const value4 = data[key4] || ""
 
-        const text = `${key1}: ${value1}, ${key2}: ${value2}, ${key3}: ${divide ? value3/(10**8) : value3}, ${key4}: ${value4}`
+        const text = `${key1}: ${value1}, ${key2}: ${value2}${key3 && ','} ${key3}${key3 && ':'} ${divide ? value3/(10**8) : value3}${key4 && ','} ${key4}${key4 && ':'} ${value4}`
         setResMessage(text)
     }
 
