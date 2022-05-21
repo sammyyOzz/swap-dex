@@ -19,7 +19,7 @@ import { useSearchAssetByIdCompare } from '../../Hooks/SearchAssetById'
 import useTabs from '../../Hooks/Tabs'
 import MyTabs from '../../components/MyTabs/MyTabs'
 import ClickAwayListener from 'react-click-away-listener'
-import { addLiquidity, createPair, getHbarAmount, getTokenAmount, hbarToToken, removeLiquidity, tokenToHbar, tokenToToken, getLiquidityPool, logout, getAccountInfo } from '../../app/swift/swiftSlice'
+import { addLiquidity, createPair, getHbarAmount, getTokenAmount, hbarToToken, removeLiquidity, tokenToHbar, tokenToToken, getLiquidityPool, logout, getAccountInfo, getLiquidityValue } from '../../app/swift/swiftSlice'
 import Layout from '../../components/Layout/Layout'
 import Table from '../../components/Table/Table'
 import { ButtonsContainer } from '../../components/UI/WalletShared/walletShared'
@@ -144,7 +144,7 @@ function ExchangeAlgo() {
         if (isAddLiquidity) {
             handleSubmit(addLiquidity({ 
                 tid: toSelectedItem.TokenId, 
-                tamount: parseFloat(liquidityValueToSend),
+                tamount: parseFloat(toInputValue),
                 hamount: parseFloat(fromInputValue), 
                 acctid: swiftAccount?.account_ID,
                 acctkey: swiftAccount?.privateKey
@@ -286,6 +286,24 @@ function ExchangeAlgo() {
                 }
 
                 if (fromSelectedItem.TokenId == 0) {
+                    if (isAddLiquidity) {
+                        setSwiftdexStatus(HTTP_STATUS.PENDING)
+                        dispatch(getLiquidityValue({
+                            tid: toSelectedItem.TokenId,
+                            hamount: fromInputValue
+                        }))
+                        .unwrap()
+                        .then(data => {
+                            setSwiftdexStatus(HTTP_STATUS.FULFILLED)
+                            handleSetToInputValue(data)
+                        })
+                        .catch(err => {
+                            console.log(err)
+                            setSwiftdexError(err)
+                            setSwiftdexStatus(HTTP_STATUS.REJECTED)
+                        })
+                        return
+                    }
                     setSwiftdexStatus(HTTP_STATUS.PENDING)
                     dispatch(getTokenAmount({
                         tid: toSelectedItem.TokenId,
@@ -297,11 +315,9 @@ function ExchangeAlgo() {
                     .then(data => {
                         setSwiftdexStatus(HTTP_STATUS.FULFILLED)
                         console.log(data)
-                        const amount = isAddLiquidity 
-                            ? (Number((data["Token Amount"]) * 100) / 94)
-                            : data["Token Amount"]
+                        const amount = data["Token Amount"]
                         handleSetToInputValue(amount.toFixed(4))
-                        setLiquidityValueToSend(amount.toFixed(4))
+                        setLiquidityValueToSend(amount)
                         if (typeof(data) !== 'object') setSwiftdexError(data)
                     })
                     .catch(err => {
@@ -421,7 +437,7 @@ function ExchangeAlgo() {
                     <Grid item xs={12} md={6}>
                     
                         <Styles.Root>
-                            
+                            <p style={{ fontSize: "18px" }}>Account ID: {accountInfo?.AccountId ? accountInfo?.AccountId : '_ __ _'}</p>
                             <p style={{ fontSize: "22px" }}>Balance: {accountInfo["Hbar Balance"] ? accountInfo["Hbar Balance"] : '_ __ _'}</p>
 
                             <div style={{ margin: '0 0 30px 20px'  }}>

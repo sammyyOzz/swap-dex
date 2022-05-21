@@ -19,6 +19,7 @@ export const tokenToToken = asyncRequest(`${namespace}/tokenToToken`, '/tokentot
 export const getTokenAmount = asyncRequest(`${namespace}/getTokenAmount`, '/gettoken', 'post')
 export const getHbarAmount = asyncRequest(`${namespace}/getHbarAmount`, '/gethbar', 'post')
 export const createPair = asyncRequest(`${namespace}/createPair`, '/createpair', 'post')
+export const getLiquidityValue = asyncRequest(`${namespace}/getLiquidityValue`, '/getLpAmount', 'post')
 
 /**
  * !pass in correct id for endpoint below
