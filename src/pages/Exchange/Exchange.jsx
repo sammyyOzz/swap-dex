@@ -135,6 +135,8 @@ function ExchangeAlgo() {
 
         const text = `${key1}: ${value1}, ${key2}: ${value2}${key3 && ','} ${key3}${key3 && ':'} ${divide ? value3/(10**8) : value3}${key4 && ','} ${key4}${key4 && ':'} ${value4}`
         setResMessage(text)
+
+        setTimeout(() => window.location.reload(false), 3000)
     }
 
     const handleSwap = () => {
